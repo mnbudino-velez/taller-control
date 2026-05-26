@@ -78,52 +78,91 @@
   .stat-box { background: var(--white); border-radius: var(--radius-sm); border: 1px solid var(--gray-border); padding: 14px; text-align: center; }
   .stat-num { font-size: 24px; font-weight: 700; }
   .stat-lbl { font-size: 11px; color: var(--gray-text); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.04em; }
-  .login-screen { background: var(--white); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px; }
-  .login-logo { font-size: 56px; margin-bottom: 16px; }
-  .login-title { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
-  .login-sub { font-size: 14px; color: var(--gray-text); margin-bottom: 40px; text-align: center; }
-  .btn-google { background: var(--blue); color: #fff; border: none; border-radius: var(--radius); padding: 16px 24px; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; justify-content: center; }
-  .btn-google:active { opacity: 0.85; }
-  .error-box { background: var(--red-light); color: var(--red-dark); border-radius: var(--radius-sm); padding: 14px; font-size: 13px; margin-top: 16px; display: none; text-align: center; line-height: 1.5; }
-  .acceso-denegado { background: var(--red-light); border-radius: var(--radius); padding: 24px; text-align: center; margin-top: 16px; display: none; }
-  .acceso-denegado .icon { font-size: 36px; margin-bottom: 8px; }
-  .acceso-denegado p { font-size: 14px; color: var(--red-dark); line-height: 1.5; }
-  .sync-indicator { font-size: 11px; color: var(--gray-text); text-align: center; padding: 6px; }
-  .trabajo-meta { display: flex; gap: 16px; margin-top: 10px; }
-  .trabajo-meta-item .lbl { font-size: 11px; color: var(--gray-text); }
-  .trabajo-meta-item .val { font-size: 14px; font-weight: 600; }
+  .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.92); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 999; gap: 16px; }
+  .spinner { width: 36px; height: 36px; border: 3px solid var(--gray-border); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  .loading-txt { font-size: 14px; color: var(--gray-text); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* LOGIN PIN */
+  .login-wrap { background: var(--white); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+  .login-logo { font-size: 52px; margin-bottom: 8px; }
+  .login-title { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+  .login-sub { font-size: 13px; color: var(--gray-text); margin-bottom: 28px; }
+
+  /* Selección operario */
+  .op-list { width: 100%; max-width: 360px; }
+  .op-btn { width: 100%; padding: 16px 18px; border-radius: var(--radius); border: 1px solid var(--gray-border); background: var(--white); font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 14px; margin-bottom: 10px; color: var(--text); transition: all 0.15s; }
+  .op-btn:active { background: var(--blue-light); border-color: var(--blue); }
+  .op-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--blue-light); color: var(--blue); font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  /* Teclado PIN */
+  .pin-wrap { width: 100%; max-width: 320px; }
+  .pin-header { text-align: center; margin-bottom: 20px; }
+  .pin-nombre { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .pin-instruccion { font-size: 13px; color: var(--gray-text); }
+  .pin-dots { display: flex; justify-content: center; gap: 14px; margin-bottom: 24px; }
+  .pin-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--gray-border); background: var(--white); transition: all 0.15s; }
+  .pin-dot.filled { background: var(--blue); border-color: var(--blue); }
+  .pin-dot.error { background: var(--red); border-color: var(--red); }
+  .pin-teclado { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .pin-key { padding: 18px 10px; border-radius: var(--radius); border: 1px solid var(--gray-border); background: var(--white); font-size: 22px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.1s; user-select: none; }
+  .pin-key:active { background: var(--blue-light); border-color: var(--blue); transform: scale(0.95); }
+  .pin-key.borrar { font-size: 18px; color: var(--gray-text); }
+  .pin-error { text-align: center; color: var(--red); font-size: 13px; font-weight: 500; margin-top: 14px; min-height: 20px; }
+
   .operario-header { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-border); padding: 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 14px; }
   .operario-avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--blue-light); color: var(--blue); font-size: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .operario-nombre { font-size: 17px; font-weight: 700; }
   .operario-turno { font-size: 12px; color: var(--gray-text); margin-top: 2px; }
-  .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 999; gap: 16px; }
-  .spinner { width: 36px; height: 36px; border: 3px solid var(--gray-border); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
-  .loading-txt { font-size: 14px; color: var(--gray-text); }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  .trabajo-meta { display: flex; gap: 16px; margin-top: 10px; }
+  .trabajo-meta-item .lbl { font-size: 11px; color: var(--gray-text); }
+  .trabajo-meta-item .val { font-size: 14px; font-weight: 600; }
+  .sync-indicator { font-size: 11px; color: var(--gray-text); text-align: center; padding: 6px; }
 </style>
 </head>
 <body>
 
-<!-- LOADING OVERLAY -->
 <div class="loading-overlay" id="loading" style="display:none">
   <div class="spinner"></div>
   <div class="loading-txt" id="loading-txt">Cargando...</div>
 </div>
 
-<!-- LOGIN -->
-<div id="s-login" class="login-screen">
+<!-- SELECCIÓN DE OPERARIO -->
+<div id="s-operarios" class="login-wrap">
   <div class="login-logo">🪚</div>
   <div class="login-title">Taller Control</div>
-  <div class="login-sub">Iniciá sesión con tu cuenta de Google para continuar</div>
-  <button class="btn-google" onclick="iniciarLogin()">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-    Entrar con Google
-  </button>
-  <div class="error-box" id="login-error"></div>
-  <div class="acceso-denegado" id="acceso-denegado">
-    <div class="icon">🚫</div>
-    <p>Tu cuenta no tiene acceso a esta app.<br>Pedile al administrador que te agregue.</p>
-    <button class="btn-google" onclick="cerrarSesion()" style="margin-top:16px;background:var(--gray-text)">Intentar con otra cuenta</button>
+  <div class="login-sub">¿Quién sos?</div>
+  <div class="op-list" id="lista-ops"></div>
+</div>
+
+<!-- PIN -->
+<div id="s-pin" class="login-wrap">
+  <div class="pin-wrap">
+    <div class="pin-header">
+      <div class="pin-nombre" id="pin-nombre"></div>
+      <div class="pin-instruccion">Ingresá tu PIN</div>
+    </div>
+    <div class="pin-dots">
+      <div class="pin-dot" id="d0"></div>
+      <div class="pin-dot" id="d1"></div>
+      <div class="pin-dot" id="d2"></div>
+      <div class="pin-dot" id="d3"></div>
+    </div>
+    <div class="pin-teclado">
+      <div class="pin-key" onclick="pinTecla('1')">1</div>
+      <div class="pin-key" onclick="pinTecla('2')">2</div>
+      <div class="pin-key" onclick="pinTecla('3')">3</div>
+      <div class="pin-key" onclick="pinTecla('4')">4</div>
+      <div class="pin-key" onclick="pinTecla('5')">5</div>
+      <div class="pin-key" onclick="pinTecla('6')">6</div>
+      <div class="pin-key" onclick="pinTecla('7')">7</div>
+      <div class="pin-key" onclick="pinTecla('8')">8</div>
+      <div class="pin-key" onclick="pinTecla('9')">9</div>
+      <div class="pin-key borrar" onclick="pinVolver()">← Volver</div>
+      <div class="pin-key" onclick="pinTecla('0')">0</div>
+      <div class="pin-key borrar" onclick="pinBorrar()">⌫</div>
+    </div>
+    <div class="pin-error" id="pin-error"></div>
   </div>
 </div>
 
@@ -256,31 +295,39 @@
       <div class="stat-box"><div class="stat-num" id="r-operario"></div><div class="stat-lbl">Operario</div></div>
     </div>
     <button class="btn-xl btn-blue" onclick="ir('s-etapa')">+ Nueva etapa</button>
-    <button class="btn-md" onclick="ir('s-trabajo')">🏠 Mis trabajos</button>
+    <button class="btn-md" onclick="cerrarSesion()">🔄 Cambiar operario</button>
   </div>
 </div>
 
 <script>
-const CLIENT_ID  = '220165516778-31l2lubvhdi78t43fk3sd59bmjb1opvc.apps.googleusercontent.com';
-const REDIRECT   = 'https://mnbudino-velez.github.io/taller-control/';
-const SCOPES     = 'openid email profile';
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxcpxd6r7YBj1cgL-R5cJNiaWa34GafckFnVhe6NA99h4gAV2_zwdAqPj9wgXXQ2LCa/exec';
 
-let userEmail = null;
 let state = { operario: null, trabajo: null, etapa: null, moduloActual: null, etapasHechas: {} };
 let crono = { segundos: 0, pausas: 0, corriendo: false, pausado: false, interval: null };
 let datos = { trabajos: [], modulos: [], sesiones: [] };
+let pinActual = '';
+let opSeleccionado = null;
 
-// ─── UI HELPERS ───────────────────────────
+// ─── UI ───────────────────────────────────
 function ir(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  const el = document.getElementById(id);
+  if (el.classList.contains('screen')) el.classList.add('active');
+  else { document.querySelectorAll('.login-wrap').forEach(s => s.style.display='none'); el.style.display='flex'; }
 }
+
+function mostrarLogin(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.login-wrap').forEach(s => s.style.display='none');
+  document.getElementById(id).style.display='flex';
+}
+
 function mostrarLoading(txt) {
   document.getElementById('loading-txt').textContent = txt || 'Cargando...';
   document.getElementById('loading').style.display = 'flex';
 }
 function ocultarLoading() { document.getElementById('loading').style.display = 'none'; }
+
 function confirmarVolver(destino) {
   if (crono.corriendo || crono.pausado) {
     if (!confirm('¿Salir? El tiempo en curso se perderá.')) return;
@@ -288,103 +335,116 @@ function confirmarVolver(destino) {
   resetCrono(); ir(destino);
 }
 
-// ─── AUTH ─────────────────────────────────
-function iniciarLogin() {
-  const params = new URLSearchParams({
-    client_id: CLIENT_ID, redirect_uri: REDIRECT,
-    response_type: 'token', scope: SCOPES,
-    prompt: 'consent', include_granted_scopes: 'true'
-  });
-  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params;
-}
-
 function cerrarSesion() {
-  userEmail = null;
-  sessionStorage.removeItem('gemail');
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('acceso-denegado').style.display = 'none';
-  document.getElementById('login-error').style.display = 'none';
-  document.getElementById('s-login').style.display = 'flex';
+  state.operario = null; pinActual = ''; opSeleccionado = null;
+  resetCrono();
+  mostrarLogin('s-operarios');
 }
 
-async function checkAuth() {
-  // Leer token del hash OAuth
-  if (window.location.hash) {
-    const hash = new URLSearchParams(window.location.hash.replace('#', ''));
-    const token = hash.get('access_token');
-    window.history.replaceState({}, '', window.location.pathname);
-    if (token) {
-      mostrarLoading('Verificando identidad...');
-      try {
-        const r = await fetch('https://openidconnect.googleapis.com/v1/userinfo', {
-          headers: { Authorization: 'Bearer ' + token }
-        });
-        const info = await r.json();
-        if (info.email) {
-          userEmail = info.email.toLowerCase().trim();
-          sessionStorage.setItem('gemail', userEmail);
-        } else throw new Error('Sin email');
-      } catch(e) {
-        ocultarLoading();
-        mostrarErrorLogin('No se pudo verificar tu identidad. Intentá de nuevo.');
-        return;
-      }
-    }
-  }
-
-  if (!userEmail) userEmail = sessionStorage.getItem('gemail');
-
-  if (userEmail) {
-    document.getElementById('s-login').style.display = 'none';
-    await iniciarApp();
-  } else {
-    ocultarLoading();
-    document.getElementById('s-login').style.display = 'flex';
-  }
-}
-
-function mostrarErrorLogin(msg) {
-  ocultarLoading();
-  const el = document.getElementById('login-error');
-  el.textContent = msg; el.style.display = 'block';
-}
-
-// ─── APPS SCRIPT API ──────────────────────
+// ─── APPS SCRIPT ──────────────────────────
 async function scriptCall(params) {
   const url = SCRIPT_URL + '?' + new URLSearchParams(params);
   const r = await fetch(url);
   const data = await r.json();
-  if (!data.ok) throw new Error(data.error || 'Error desconocido');
+  if (!data.ok) throw new Error(data.error || 'Error');
   return data;
 }
 
-// ─── INICIAR APP ──────────────────────────
+// ─── INICIO ───────────────────────────────
 async function iniciarApp() {
-  mostrarLoading('Verificando acceso...');
+  mostrarLoading('Cargando operarios...');
   try {
-    const res = await scriptCall({ action: 'getDatos', email: userEmail });
+    const res = await scriptCall({ action: 'getOperarios' });
+    renderOperarios(res.operarios);
+  } catch(e) {
+    ocultarLoading();
+    alert('Error conectando con el servidor. Revisá la conexión.');
+    return;
+  }
+  ocultarLoading();
+  mostrarLogin('s-operarios');
+}
+
+function renderOperarios(operarios) {
+  const cont = document.getElementById('lista-ops');
+  cont.innerHTML = '';
+  operarios.forEach(op => {
+    const iniciales = op.nombre.split(' ').map(p=>p[0]).join('').substring(0,2).toUpperCase();
+    const btn = document.createElement('button');
+    btn.className = 'op-btn';
+    btn.innerHTML = `<div class="op-avatar">${iniciales}</div><span>${op.nombre}</span>`;
+    btn.onclick = () => elegirOperario(op);
+    cont.appendChild(btn);
+  });
+}
+
+// ─── PIN ──────────────────────────────────
+function elegirOperario(op) {
+  opSeleccionado = op;
+  pinActual = '';
+  document.getElementById('pin-nombre').textContent = op.nombre;
+  document.getElementById('pin-error').textContent = '';
+  actualizarDots();
+  mostrarLogin('s-pin');
+}
+
+function pinTecla(n) {
+  if (pinActual.length >= 4) return;
+  pinActual += n;
+  actualizarDots();
+  if (pinActual.length === 4) verificarPin();
+}
+
+function pinBorrar() {
+  pinActual = pinActual.slice(0, -1);
+  document.getElementById('pin-error').textContent = '';
+  actualizarDots();
+}
+
+function pinVolver() {
+  pinActual = '';
+  actualizarDots();
+  mostrarLogin('s-operarios');
+}
+
+function actualizarDots() {
+  for (let i = 0; i < 4; i++) {
+    const d = document.getElementById('d' + i);
+    d.className = 'pin-dot' + (i < pinActual.length ? ' filled' : '');
+  }
+}
+
+async function verificarPin() {
+  mostrarLoading('Verificando...');
+  try {
+    const res = await scriptCall({ action: 'login', operario_id: opSeleccionado.id, pin: pinActual });
     state.operario = res.operario;
     datos.trabajos  = res.trabajos  || [];
     datos.modulos   = res.modulos   || [];
     datos.sesiones  = res.sesiones  || [];
+    ocultarLoading();
+    entrarAlTaller();
   } catch(e) {
     ocultarLoading();
-    if (e.message === 'sin_acceso') {
-      document.getElementById('s-login').style.display = 'flex';
-      document.getElementById('acceso-denegado').style.display = 'block';
+    pinActual = '';
+    actualizarDots();
+    if (e.message === 'pin_incorrecto') {
+      // Animación error
+      for (let i = 0; i < 4; i++) document.getElementById('d'+i).className = 'pin-dot error';
+      document.getElementById('pin-error').textContent = 'PIN incorrecto, intentá de nuevo';
+      setTimeout(() => { actualizarDots(); }, 800);
     } else {
-      mostrarErrorLogin('Error cargando datos: ' + e.message);
+      document.getElementById('pin-error').textContent = 'Error de conexión, intentá de nuevo';
     }
-    return;
   }
-  ocultarLoading();
+}
 
+function entrarAlTaller() {
   const iniciales = state.operario.nombre.split(' ').map(p=>p[0]).join('').substring(0,2).toUpperCase();
   document.getElementById('op-avatar').textContent = iniciales;
   document.getElementById('op-nombre').textContent = state.operario.nombre;
-  document.getElementById('op-turno').textContent = new Date().toLocaleDateString('es-AR', { weekday:'long', day:'numeric', month:'long' });
-  document.getElementById('op-fecha').textContent = new Date().toLocaleDateString('es-AR', { weekday:'long', day:'numeric', month:'long' });
-
+  document.getElementById('op-turno').textContent = new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}) + ' hs';
+  document.getElementById('op-fecha').textContent = new Date().toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});
   renderTrabajos();
   ir('s-trabajo');
 }
@@ -429,31 +489,26 @@ function elegirTrabajo(t) {
   state.trabajo = t;
   state.etapasHechas = {};
   datos.sesiones.filter(s => s.trabajo_id === t.id).forEach(s => { state.etapasHechas[s.etapa] = true; });
-
   document.getElementById('e-trabajo-nombre').textContent = t.cliente;
   document.getElementById('e-operario-nombre').textContent = state.operario.nombre;
   document.getElementById('e-piezas-descarga').textContent = t.piezas + ' piezas';
   document.getElementById('e-piezas-corte').textContent = t.piezas + ' piezas';
   document.getElementById('e-mods-clasificacion').textContent = t.modulos + ' módulos';
-
   const modsT = datos.modulos.filter(m => m.trabajo_id === t.id);
   const modsH = modsT.filter(m => m.estado === 'terminado').length;
   document.getElementById('e-mods-armado').textContent = modsH + '/' + modsT.length + ' módulos';
-
   ['descarga','corte','clasificacion'].forEach(e => {
     const card = document.getElementById('ec-' + e);
     const check = document.getElementById('ck-' + e);
     if (state.etapasHechas[e]) { card.classList.add('hecha'); check.textContent = '✅'; }
     else { card.classList.remove('hecha'); check.textContent = ''; }
   });
-
   const ckA = document.getElementById('ck-armado');
   ckA.textContent = modsH > 0 && modsH === modsT.length ? '✅' : modsH > 0 ? '🔄' : '';
-
   ir('s-etapa');
 }
 
-// ─── ETAPAS SIMPLES ───────────────────────
+// ─── ETAPAS ───────────────────────────────
 const ETAPA_INFO = {
   descarga:      { nombre:'Descarga',       unidad:'piezas',  getCant: t => t.piezas },
   corte:         { nombre:'Corte / rebaje', unidad:'piezas',  getCant: t => t.piezas },
@@ -484,37 +539,25 @@ function irEtapaSimple(etapa) {
 // ─── CRONÓMETRO ───────────────────────────
 function pad(n) { return String(n).padStart(2,'0'); }
 function fmt(s) { return pad(Math.floor(s/3600))+':'+pad(Math.floor((s%3600)/60))+':'+pad(s%60); }
-function resetCrono() {
-  clearInterval(crono.interval);
-  crono = { segundos:0, pausas:0, corriendo:false, pausado:false, interval:null };
-}
-function tickCrono(timeId) {
-  crono.interval = setInterval(() => { crono.segundos++; document.getElementById(timeId).textContent = fmt(crono.segundos); }, 1000);
-}
+function resetCrono() { clearInterval(crono.interval); crono = { segundos:0, pausas:0, corriendo:false, pausado:false, interval:null }; }
+function tickCrono(id) { crono.interval = setInterval(() => { crono.segundos++; document.getElementById(id).textContent = fmt(crono.segundos); }, 1000); }
 
 function accionCrono() {
-  const play = document.getElementById('c-btn-play');
-  const stop = document.getElementById('c-btn-stop');
-  const timeEl = document.getElementById('c-time');
-  const statusEl = document.getElementById('c-status');
-  const pausasEl = document.getElementById('c-pausas');
+  const play=document.getElementById('c-btn-play'), stop=document.getElementById('c-btn-stop');
+  const timeEl=document.getElementById('c-time'), statusEl=document.getElementById('c-status'), pausasEl=document.getElementById('c-pausas');
   if (!crono.corriendo && !crono.pausado) {
-    crono.corriendo = true; timeEl.className = 'crono-time running';
-    statusEl.textContent = ETAPA_INFO[state.etapa].nombre + ' en progreso...';
-    play.innerHTML = '⏸ Pausar'; play.className = 'btn-xl btn-pause';
-    stop.style.display = 'flex'; tickCrono('c-time');
+    crono.corriendo=true; timeEl.className='crono-time running';
+    statusEl.textContent=ETAPA_INFO[state.etapa].nombre+' en progreso...';
+    play.innerHTML='⏸ Pausar'; play.className='btn-xl btn-pause'; stop.style.display='flex'; tickCrono('c-time');
   } else if (crono.corriendo) {
-    crono.corriendo = false; crono.pausado = true; crono.pausas++;
-    clearInterval(crono.interval); timeEl.className = 'crono-time paused';
-    statusEl.textContent = 'En pausa'; pausasEl.style.display = 'block';
-    pausasEl.textContent = crono.pausas + (crono.pausas===1?' pausa':' pausas');
-    play.innerHTML = '▶ Continuar'; play.className = 'btn-xl btn-play';
+    crono.corriendo=false; crono.pausado=true; crono.pausas++; clearInterval(crono.interval);
+    timeEl.className='crono-time paused'; statusEl.textContent='En pausa';
+    pausasEl.style.display='block'; pausasEl.textContent=crono.pausas+(crono.pausas===1?' pausa':' pausas');
+    play.innerHTML='▶ Continuar'; play.className='btn-xl btn-play';
   } else {
-    crono.pausado = false; crono.corriendo = true;
-    timeEl.className = 'crono-time running';
-    statusEl.textContent = ETAPA_INFO[state.etapa].nombre + ' en progreso...';
-    play.innerHTML = '⏸ Pausar'; play.className = 'btn-xl btn-pause';
-    tickCrono('c-time');
+    crono.pausado=false; crono.corriendo=true; timeEl.className='crono-time running';
+    statusEl.textContent=ETAPA_INFO[state.etapa].nombre+' en progreso...';
+    play.innerHTML='⏸ Pausar'; play.className='btn-xl btn-pause'; tickCrono('c-time');
   }
 }
 
@@ -522,30 +565,18 @@ async function guardarEtapa() {
   clearInterval(crono.interval);
   const info = ETAPA_INFO[state.etapa];
   const cant = parseInt(info.getCant(state.trabajo)) || 0;
-  const horas = crono.segundos / 3600;
-  const ritmo = horas > 0 ? Math.round(cant / horas) : 0;
+  const ritmo = crono.segundos > 0 ? Math.round(cant / (crono.segundos/3600)) : 0;
   mostrarResumen(info.nombre, crono.segundos, crono.pausas, ritmo, info.unidad);
   state.etapasHechas[state.etapa] = true;
   datos.sesiones.push({ trabajo_id: state.trabajo.id, etapa: state.etapa });
   ir('s-resumen');
   try {
-    await scriptCall({
-      action: 'guardarSesion',
-      email: userEmail,
-      data: JSON.stringify({
-        id: 'S-'+Date.now(),
-        fecha: new Date().toISOString().split('T')[0],
-        operario_id: state.operario.id,
-        trabajo_id: state.trabajo.id,
-        modulo_id: '',
-        etapa: state.etapa,
-        segundos: crono.segundos,
-        pausas: crono.pausas,
-        cantidad: cant,
-        unidad: info.unidad
-      })
-    });
-  } catch(e) { console.error('Error guardando etapa:', e); }
+    await scriptCall({ action:'guardarSesion', operario_id: state.operario.id, data: JSON.stringify({
+      id:'S-'+Date.now(), fecha:new Date().toISOString().split('T')[0],
+      operario_id:state.operario.id, trabajo_id:state.trabajo.id, modulo_id:'',
+      etapa:state.etapa, segundos:crono.segundos, pausas:crono.pausas, cantidad:cant, unidad:info.unidad
+    })});
+  } catch(e) { console.error('Error guardando:', e); }
 }
 
 // ─── MÓDULOS ──────────────────────────────
@@ -558,42 +589,38 @@ function renderModulos() {
   const mods = datos.modulos.filter(m => m.trabajo_id === state.trabajo.id);
   const cont = document.getElementById('lista-modulos');
   cont.innerHTML = '';
-  if (!mods.length) {
-    cont.innerHTML = '<div style="color:var(--gray-text);font-size:14px;text-align:center;padding:24px">No hay módulos cargados para este trabajo</div>';
-    return;
-  }
+  if (!mods.length) { cont.innerHTML='<div style="color:var(--gray-text);font-size:14px;text-align:center;padding:24px">No hay módulos cargados para este trabajo</div>'; return; }
   mods.forEach(m => {
-    const hecho = m.estado === 'terminado';
+    const hecho = m.estado==='terminado';
     const compColor = {alta:'badge-red',media:'badge-amber',baja:'badge-green'}[m.complejidad]||'badge-gray';
     const div = document.createElement('div');
-    div.className = 'modulo-item' + (hecho ? ' hecho' : '');
+    div.className = 'modulo-item'+(hecho?' hecho':'');
     div.innerHTML = `
       <div>
         <div class="modulo-nombre">${m.id} — ${m.nombre}</div>
         <div class="modulo-detalle">${m.medidas} · ${m.piezas} piezas</div>
         <div style="margin-top:6px;display:flex;gap:6px">
           <span class="badge ${compColor}">${m.complejidad}</span>
-          ${hecho ? '<span class="badge badge-green">✓ Terminado</span>' : ''}
+          ${hecho?'<span class="badge badge-green">✓ Terminado</span>':''}
         </div>
       </div>
-      <div style="color:var(--gray-text);font-size:20px">${hecho ? '✅' : '›'}</div>`;
+      <div style="color:var(--gray-text);font-size:20px">${hecho?'✅':'›'}</div>`;
     div.onclick = () => abrirModulo(m);
     cont.appendChild(div);
   });
-  const hechos = mods.filter(m => m.estado==='terminado').length;
-  document.getElementById('sync-mod').textContent = hechos + ' de ' + mods.length + ' módulos terminados';
+  const hechos = mods.filter(m=>m.estado==='terminado').length;
+  document.getElementById('sync-mod').textContent = hechos+' de '+mods.length+' módulos terminados';
 }
 
 function abrirModulo(m) {
-  state.moduloActual = m;
-  resetCrono();
+  state.moduloActual = m; resetCrono();
   document.getElementById('a-modulo-nombre').textContent = m.nombre;
-  document.getElementById('a-trabajo-nombre').textContent = state.trabajo.cliente + ' · ' + state.operario.nombre;
+  document.getElementById('a-trabajo-nombre').textContent = state.trabajo.cliente+' · '+state.operario.nombre;
   document.getElementById('a-piezas').textContent = m.piezas;
   document.getElementById('a-complejidad').textContent = m.complejidad;
   document.getElementById('a-time').textContent = '00:00:00';
   document.getElementById('a-time').className = 'crono-time';
-  document.getElementById('a-status').textContent = m.estado === 'terminado'
+  document.getElementById('a-status').textContent = m.estado==='terminado'
     ? '⚠️ Este módulo ya fue marcado como terminado — podés rehacerlo si fue un error'
     : 'Listo para iniciar';
   document.getElementById('a-pausas').style.display = 'none';
@@ -601,90 +628,60 @@ function abrirModulo(m) {
   document.getElementById('a-btn-play').innerHTML = '▶ Iniciar armado';
   document.getElementById('a-btn-play').className = 'btn-xl btn-play';
   document.getElementById('a-btn-stop').style.display = 'none';
-  const img = document.getElementById('a-plano-img');
-  const ph  = document.getElementById('a-plano-placeholder');
+  const img=document.getElementById('a-plano-img'), ph=document.getElementById('a-plano-placeholder');
   if (m.url_plano && m.url_plano.trim()) {
-    let url = m.url_plano;
-    const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-    if (match) url = `https://drive.google.com/uc?export=view&id=${match[1]}`;
-    img.src = url; img.style.display = 'block'; ph.style.display = 'none';
-  } else {
-    img.style.display = 'none'; ph.style.display = 'block';
-    document.getElementById('a-plano-txt').textContent = m.nombre + ' · ' + m.medidas;
-  }
+    let url=m.url_plano; const match=url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (match) url=`https://drive.google.com/uc?export=view&id=${match[1]}`;
+    img.src=url; img.style.display='block'; ph.style.display='none';
+  } else { img.style.display='none'; ph.style.display='block'; document.getElementById('a-plano-txt').textContent=m.nombre+' · '+m.medidas; }
   ir('s-armado');
 }
 
 function accionCronoArmado() {
-  const play = document.getElementById('a-btn-play');
-  const stop = document.getElementById('a-btn-stop');
-  const timeEl = document.getElementById('a-time');
-  const statusEl = document.getElementById('a-status');
-  const pausasEl = document.getElementById('a-pausas');
+  const play=document.getElementById('a-btn-play'), stop=document.getElementById('a-btn-stop');
+  const timeEl=document.getElementById('a-time'), statusEl=document.getElementById('a-status'), pausasEl=document.getElementById('a-pausas');
   if (!crono.corriendo && !crono.pausado) {
-    crono.corriendo = true; timeEl.className = 'crono-time running';
-    statusEl.textContent = 'Armado en progreso...';
-    play.innerHTML = '⏸ Pausar'; play.className = 'btn-xl btn-pause';
-    stop.style.display = 'flex'; tickCrono('a-time');
+    crono.corriendo=true; timeEl.className='crono-time running'; statusEl.textContent='Armado en progreso...';
+    play.innerHTML='⏸ Pausar'; play.className='btn-xl btn-pause'; stop.style.display='flex'; tickCrono('a-time');
   } else if (crono.corriendo) {
-    crono.corriendo = false; crono.pausado = true; crono.pausas++;
-    clearInterval(crono.interval); timeEl.className = 'crono-time paused';
-    statusEl.textContent = 'En pausa'; pausasEl.style.display = 'block';
-    pausasEl.textContent = crono.pausas + (crono.pausas===1?' pausa':' pausas');
-    play.innerHTML = '▶ Continuar'; play.className = 'btn-xl btn-play';
+    crono.corriendo=false; crono.pausado=true; crono.pausas++; clearInterval(crono.interval);
+    timeEl.className='crono-time paused'; statusEl.textContent='En pausa';
+    pausasEl.style.display='block'; pausasEl.textContent=crono.pausas+(crono.pausas===1?' pausa':' pausas');
+    play.innerHTML='▶ Continuar'; play.className='btn-xl btn-play';
   } else {
-    crono.pausado = false; crono.corriendo = true;
-    timeEl.className = 'crono-time running'; statusEl.textContent = 'Armado en progreso...';
-    play.innerHTML = '⏸ Pausar'; play.className = 'btn-xl btn-pause';
-    tickCrono('a-time');
+    crono.pausado=false; crono.corriendo=true; timeEl.className='crono-time running'; statusEl.textContent='Armado en progreso...';
+    play.innerHTML='⏸ Pausar'; play.className='btn-xl btn-pause'; tickCrono('a-time');
   }
 }
 
 async function guardarArmado() {
   clearInterval(crono.interval);
-  const m = state.moduloActual;
-  const cant = parseInt(m.piezas) || 0;
-  const horas = crono.segundos / 3600;
-  const ritmo = horas > 0 ? Math.round(cant / horas) : 0;
+  const m=state.moduloActual, cant=parseInt(m.piezas)||0;
+  const ritmo=crono.segundos>0?Math.round(cant/(crono.segundos/3600)):0;
   mostrarResumen(m.nombre, crono.segundos, crono.pausas, ritmo, 'piezas');
   ir('s-resumen');
   try {
-    await scriptCall({
-      action: 'marcarModulo',
-      email: userEmail,
-      data: JSON.stringify({ modulo_id: m.id, trabajo_id: m.trabajo_id })
-    });
-    await scriptCall({
-      action: 'guardarSesion',
-      email: userEmail,
-      data: JSON.stringify({
-        id: 'S-'+Date.now(),
-        fecha: new Date().toISOString().split('T')[0],
-        operario_id: state.operario.id,
-        trabajo_id: state.trabajo.id,
-        modulo_id: m.id,
-        etapa: 'armado',
-        segundos: crono.segundos,
-        pausas: crono.pausas,
-        cantidad: cant,
-        unidad: 'piezas'
-      })
-    });
-    const globalIdx = datos.modulos.findIndex(mod => mod.id===m.id && mod.trabajo_id===m.trabajo_id);
-    if (globalIdx >= 0) datos.modulos[globalIdx].estado = 'terminado';
+    await scriptCall({ action:'marcarModulo', operario_id:state.operario.id, data:JSON.stringify({modulo_id:m.id,trabajo_id:m.trabajo_id}) });
+    await scriptCall({ action:'guardarSesion', operario_id:state.operario.id, data:JSON.stringify({
+      id:'S-'+Date.now(), fecha:new Date().toISOString().split('T')[0],
+      operario_id:state.operario.id, trabajo_id:state.trabajo.id, modulo_id:m.id,
+      etapa:'armado', segundos:crono.segundos, pausas:crono.pausas, cantidad:cant, unidad:'piezas'
+    })});
+    const idx=datos.modulos.findIndex(mod=>mod.id===m.id&&mod.trabajo_id===m.trabajo_id);
+    if (idx>=0) datos.modulos[idx].estado='terminado';
   } catch(e) { console.error('Error guardando armado:', e); }
 }
 
 function mostrarResumen(nombre, segs, pausas, ritmo, unidad) {
-  document.getElementById('r-sub').textContent = nombre + ' · ' + state.trabajo.cliente;
+  document.getElementById('r-sub').textContent = nombre+' · '+state.trabajo.cliente;
   document.getElementById('r-tiempo').textContent = fmt(segs);
   document.getElementById('r-pausas').textContent = pausas;
   document.getElementById('r-ritmo').textContent = ritmo;
-  document.getElementById('r-ritmo-lbl').textContent = unidad + '/hora';
+  document.getElementById('r-ritmo-lbl').textContent = unidad+'/hora';
   document.getElementById('r-operario').textContent = state.operario.nombre;
 }
 
-window.addEventListener('load', checkAuth);
+window.addEventListener('load', iniciarApp);
 </script>
 </body>
 </html>
