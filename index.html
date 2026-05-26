@@ -95,10 +95,20 @@
   .operario-header { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-border); padding: 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 14px; }
   .operario-avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--blue-light); color: var(--blue); font-size: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .operario-nombre { font-size: 17px; font-weight: 700; }
-  .operario-mail { font-size: 12px; color: var(--gray-text); margin-top: 2px; }
+  .operario-turno { font-size: 12px; color: var(--gray-text); margin-top: 2px; }
+  .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 999; gap: 16px; }
+  .spinner { width: 36px; height: 36px; border: 3px solid var(--gray-border); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  .loading-txt { font-size: 14px; color: var(--gray-text); }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
+
+<!-- LOADING OVERLAY -->
+<div class="loading-overlay" id="loading" style="display:none">
+  <div class="spinner"></div>
+  <div class="loading-txt" id="loading-txt">Cargando...</div>
+</div>
 
 <!-- LOGIN -->
 <div id="s-login" class="login-screen">
@@ -126,7 +136,7 @@
   <div class="content">
     <div class="operario-header">
       <div class="operario-avatar" id="op-avatar"></div>
-      <div><div class="operario-nombre" id="op-nombre"></div><div class="operario-mail" id="op-mail"></div></div>
+      <div><div class="operario-nombre" id="op-nombre"></div><div class="operario-turno" id="op-turno"></div></div>
     </div>
     <div class="section-label">Trabajo activo</div>
     <div id="lista-trabajos-activos"></div>
@@ -251,45 +261,45 @@
 </div>
 
 <script>
-const CLIENT_ID = '220165516778-31l2lubvhdi78t43fk3sd59bmjb1opvc.apps.googleusercontent.com';
-const SHEET_ID  = '1GzE-KEZ-s_LxLqdgA8283tPy--yxWMY6MEksa6dgUFk';
-const SCOPES    = 'https://www.googleapis.com/auth/spreadsheets openid email profile';
-const REDIRECT  = 'https://mnbudino-velez.github.io/taller-control/';
+const CLIENT_ID  = '220165516778-31l2lubvhdi78t43fk3sd59bmjb1opvc.apps.googleusercontent.com';
+const REDIRECT   = 'https://mnbudino-velez.github.io/taller-control/';
+const SCOPES     = 'openid email profile';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxcpxd6r7YBj1cgL-R5cJNiaWa34GafckFnVhe6NA99h4gAV2_zwdAqPj9wgXXQ2LCa/exec';
 
-let token = null;
 let userEmail = null;
 let state = { operario: null, trabajo: null, etapa: null, moduloActual: null, etapasHechas: {} };
 let crono = { segundos: 0, pausas: 0, corriendo: false, pausado: false, interval: null };
-let datos = { operarios: [], trabajos: [], modulos: [] };
+let datos = { trabajos: [], modulos: [], sesiones: [] };
 
+// ─── UI HELPERS ───────────────────────────
 function ir(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
-
+function mostrarLoading(txt) {
+  document.getElementById('loading-txt').textContent = txt || 'Cargando...';
+  document.getElementById('loading').style.display = 'flex';
+}
+function ocultarLoading() { document.getElementById('loading').style.display = 'none'; }
 function confirmarVolver(destino) {
   if (crono.corriendo || crono.pausado) {
     if (!confirm('¿Salir? El tiempo en curso se perderá.')) return;
   }
-  resetCrono();
-  ir(destino);
+  resetCrono(); ir(destino);
 }
 
+// ─── AUTH ─────────────────────────────────
 function iniciarLogin() {
   const params = new URLSearchParams({
-    client_id: CLIENT_ID,
-    redirect_uri: REDIRECT,
-    response_type: 'token',
-    scope: SCOPES,
-    prompt: 'consent',
-    include_granted_scopes: 'true'
+    client_id: CLIENT_ID, redirect_uri: REDIRECT,
+    response_type: 'token', scope: SCOPES,
+    prompt: 'consent', include_granted_scopes: 'true'
   });
   window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params;
 }
 
 function cerrarSesion() {
-  token = null; userEmail = null;
-  sessionStorage.removeItem('gtoken');
+  userEmail = null;
   sessionStorage.removeItem('gemail');
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('acceso-denegado').style.display = 'none';
@@ -298,107 +308,81 @@ function cerrarSesion() {
 }
 
 async function checkAuth() {
+  // Leer token del hash OAuth
   if (window.location.hash) {
     const hash = new URLSearchParams(window.location.hash.replace('#', ''));
-    const t = hash.get('access_token');
-    const err = hash.get('error');
+    const token = hash.get('access_token');
     window.history.replaceState({}, '', window.location.pathname);
-    if (t) {
-      token = t;
-      // Obtener email del usuario
+    if (token) {
+      mostrarLoading('Verificando identidad...');
       try {
         const r = await fetch('https://openidconnect.googleapis.com/v1/userinfo', {
           headers: { Authorization: 'Bearer ' + token }
         });
         const info = await r.json();
-        userEmail = info.email;
-        sessionStorage.setItem('gtoken', token);
-        sessionStorage.setItem('gemail', userEmail);
-      } catch(e) { mostrarErrorLogin('No se pudo obtener la información de tu cuenta.'); return; }
-    } else if (err) {
-      mostrarErrorLogin('Error: ' + err); return;
+        if (info.email) {
+          userEmail = info.email.toLowerCase().trim();
+          sessionStorage.setItem('gemail', userEmail);
+        } else throw new Error('Sin email');
+      } catch(e) {
+        ocultarLoading();
+        mostrarErrorLogin('No se pudo verificar tu identidad. Intentá de nuevo.');
+        return;
+      }
     }
   }
 
-  if (!token) token = sessionStorage.getItem('gtoken');
   if (!userEmail) userEmail = sessionStorage.getItem('gemail');
 
-  if (token && userEmail) {
+  if (userEmail) {
     document.getElementById('s-login').style.display = 'none';
     await iniciarApp();
   } else {
+    ocultarLoading();
     document.getElementById('s-login').style.display = 'flex';
   }
 }
 
 function mostrarErrorLogin(msg) {
+  ocultarLoading();
   const el = document.getElementById('login-error');
   el.textContent = msg; el.style.display = 'block';
 }
 
-// ─── SHEETS API ───────────────────────────
-async function sheetsGet(range) {
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(range)}`;
-  const r = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
-  if (r.status === 401) { cerrarSesion(); throw new Error('Token expirado'); }
-  return (await r.json()).values || [];
-}
-
-async function sheetsAppend(range, values) {
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(range)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
-  const r = await fetch(url, {
-    method: 'POST',
-    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ values })
-  });
-  if (r.status === 401) { cerrarSesion(); throw new Error('Token expirado'); }
-  return r.json();
-}
-
-async function sheetsUpdate(range, values) {
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
-  await fetch(url, {
-    method: 'PUT',
-    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ values })
-  });
-}
-
-// ─── CARGAR DATOS ─────────────────────────
-async function cargarDatos() {
-  const [ops, trajs, mods, ses] = await Promise.all([
-    sheetsGet('operarios!A2:D'),   // +columna email
-    sheetsGet('trabajos!A2:F'),
-    sheetsGet('modulos!A2:H'),
-    sheetsGet('sesiones!A2:J')
-  ]);
-  datos.operarios = (ops||[]).map(r => ({ id:r[0], nombre:r[1], activo:r[2], email:(r[3]||'').toLowerCase().trim() }));
-  datos.trabajos  = (trajs||[]).map(r => ({ id:r[0], cliente:r[1], modulos:r[2], piezas:r[3], fecha:r[4], estado:r[5] }));
-  datos.modulos   = (mods||[]).map(r => ({ id:r[0], trabajo_id:r[1], nombre:r[2], medidas:r[3], piezas:r[4], complejidad:r[5], estado:r[6], url_plano:r[7]||'' }));
-  datos.sesiones  = (ses||[]).map(r => ({ trabajo_id:r[3], etapa:r[5] }));
+// ─── APPS SCRIPT API ──────────────────────
+async function scriptCall(params) {
+  const url = SCRIPT_URL + '?' + new URLSearchParams(params);
+  const r = await fetch(url);
+  const data = await r.json();
+  if (!data.ok) throw new Error(data.error || 'Error desconocido');
+  return data;
 }
 
 // ─── INICIAR APP ──────────────────────────
 async function iniciarApp() {
+  mostrarLoading('Verificando acceso...');
   try {
-    await cargarDatos();
-  } catch(e) { mostrarErrorLogin('Error cargando datos. Intentá de nuevo.'); return; }
-
-  // Buscar operario por email
-  const emailNorm = (userEmail||'').toLowerCase().trim();
-  const operario = datos.operarios.find(o => o.email === emailNorm && o.activo === 'si');
-
-  if (!operario) {
-    document.getElementById('s-login').style.display = 'flex';
-    document.getElementById('acceso-denegado').style.display = 'block';
+    const res = await scriptCall({ action: 'getDatos', email: userEmail });
+    state.operario = res.operario;
+    datos.trabajos  = res.trabajos  || [];
+    datos.modulos   = res.modulos   || [];
+    datos.sesiones  = res.sesiones  || [];
+  } catch(e) {
+    ocultarLoading();
+    if (e.message === 'sin_acceso') {
+      document.getElementById('s-login').style.display = 'flex';
+      document.getElementById('acceso-denegado').style.display = 'block';
+    } else {
+      mostrarErrorLogin('Error cargando datos: ' + e.message);
+    }
     return;
   }
+  ocultarLoading();
 
-  state.operario = operario;
-  const iniciales = operario.nombre.split(' ').map(p=>p[0]).join('').substring(0,2).toUpperCase();
+  const iniciales = state.operario.nombre.split(' ').map(p=>p[0]).join('').substring(0,2).toUpperCase();
   document.getElementById('op-avatar').textContent = iniciales;
-  document.getElementById('op-nombre').textContent = operario.nombre;
-  document.getElementById('op-mail').textContent = userEmail;
+  document.getElementById('op-nombre').textContent = state.operario.nombre;
+  document.getElementById('op-turno').textContent = new Date().toLocaleDateString('es-AR', { weekday:'long', day:'numeric', month:'long' });
   document.getElementById('op-fecha').textContent = new Date().toLocaleDateString('es-AR', { weekday:'long', day:'numeric', month:'long' });
 
   renderTrabajos();
@@ -409,11 +393,10 @@ async function iniciarApp() {
 function renderTrabajos() {
   const activos    = datos.trabajos.filter(t => t.estado === 'en_curso');
   const pendientes = datos.trabajos.filter(t => t.estado === 'pendiente');
-  const cA = document.getElementById('lista-trabajos-activos');
-  const cP = document.getElementById('lista-trabajos-pendientes');
-  cA.innerHTML = ''; cP.innerHTML = '';
-  activos.forEach(t => cA.appendChild(crearCardTrabajo(t, true)));
-  pendientes.forEach(t => cP.appendChild(crearCardTrabajo(t, false)));
+  document.getElementById('lista-trabajos-activos').innerHTML = '';
+  document.getElementById('lista-trabajos-pendientes').innerHTML = '';
+  activos.forEach(t => document.getElementById('lista-trabajos-activos').appendChild(crearCardTrabajo(t, true)));
+  pendientes.forEach(t => document.getElementById('lista-trabajos-pendientes').appendChild(crearCardTrabajo(t, false)));
   document.getElementById('sync-tr').textContent = activos.length + ' activo(s) · ' + pendientes.length + ' pendiente(s)';
 }
 
@@ -444,12 +427,8 @@ function formatFecha(f) {
 
 function elegirTrabajo(t) {
   state.trabajo = t;
-
-  // Calcular qué etapas ya tienen sesión registrada para este trabajo
   state.etapasHechas = {};
-  datos.sesiones.filter(s => s.trabajo_id === t.id).forEach(s => {
-    state.etapasHechas[s.etapa] = true;
-  });
+  datos.sesiones.filter(s => s.trabajo_id === t.id).forEach(s => { state.etapasHechas[s.etapa] = true; });
 
   document.getElementById('e-trabajo-nombre').textContent = t.cliente;
   document.getElementById('e-operario-nombre').textContent = state.operario.nombre;
@@ -457,33 +436,19 @@ function elegirTrabajo(t) {
   document.getElementById('e-piezas-corte').textContent = t.piezas + ' piezas';
   document.getElementById('e-mods-clasificacion').textContent = t.modulos + ' módulos';
 
-  // Módulos armados
-  const modsHechos = datos.modulos.filter(m => m.trabajo_id === t.id && m.estado === 'terminado').length;
-  const modsTotal  = datos.modulos.filter(m => m.trabajo_id === t.id).length;
-  document.getElementById('e-mods-armado').textContent = modsHechos + '/' + modsTotal + ' módulos';
+  const modsT = datos.modulos.filter(m => m.trabajo_id === t.id);
+  const modsH = modsT.filter(m => m.estado === 'terminado').length;
+  document.getElementById('e-mods-armado').textContent = modsH + '/' + modsT.length + ' módulos';
 
-  // Indicadores visuales de etapas hechas
   ['descarga','corte','clasificacion'].forEach(e => {
     const card = document.getElementById('ec-' + e);
     const check = document.getElementById('ck-' + e);
-    if (state.etapasHechas[e]) {
-      card.classList.add('hecha');
-      check.textContent = '✅';
-    } else {
-      card.classList.remove('hecha');
-      check.textContent = '';
-    }
+    if (state.etapasHechas[e]) { card.classList.add('hecha'); check.textContent = '✅'; }
+    else { card.classList.remove('hecha'); check.textContent = ''; }
   });
 
-  // Check armado
-  const ckArmado = document.getElementById('ck-armado');
-  if (modsHechos > 0 && modsHechos === modsTotal) {
-    ckArmado.textContent = '✅';
-  } else if (modsHechos > 0) {
-    ckArmado.textContent = '🔄';
-  } else {
-    ckArmado.textContent = '';
-  }
+  const ckA = document.getElementById('ck-armado');
+  ckA.textContent = modsH > 0 && modsH === modsT.length ? '✅' : modsH > 0 ? '🔄' : '';
 
   ir('s-etapa');
 }
@@ -506,7 +471,7 @@ function irEtapaSimple(etapa) {
   document.getElementById('c-time').textContent = '00:00:00';
   document.getElementById('c-time').className = 'crono-time';
   document.getElementById('c-status').textContent = state.etapasHechas[etapa]
-    ? '⚠️ Esta etapa ya fue registrada — podés hacerla de nuevo si fue un error'
+    ? '⚠️ Esta etapa ya fue registrada — podés rehacerla si fue un error'
     : 'Listo para iniciar';
   document.getElementById('c-pausas').style.display = 'none';
   document.getElementById('c-btn-play').style.display = 'flex';
@@ -519,17 +484,12 @@ function irEtapaSimple(etapa) {
 // ─── CRONÓMETRO ───────────────────────────
 function pad(n) { return String(n).padStart(2,'0'); }
 function fmt(s) { return pad(Math.floor(s/3600))+':'+pad(Math.floor((s%3600)/60))+':'+pad(s%60); }
-
 function resetCrono() {
   clearInterval(crono.interval);
   crono = { segundos:0, pausas:0, corriendo:false, pausado:false, interval:null };
 }
-
 function tickCrono(timeId) {
-  crono.interval = setInterval(() => {
-    crono.segundos++;
-    document.getElementById(timeId).textContent = fmt(crono.segundos);
-  }, 1000);
+  crono.interval = setInterval(() => { crono.segundos++; document.getElementById(timeId).textContent = fmt(crono.segundos); }, 1000);
 }
 
 function accionCrono() {
@@ -539,16 +499,14 @@ function accionCrono() {
   const statusEl = document.getElementById('c-status');
   const pausasEl = document.getElementById('c-pausas');
   if (!crono.corriendo && !crono.pausado) {
-    crono.corriendo = true;
-    timeEl.className = 'crono-time running';
+    crono.corriendo = true; timeEl.className = 'crono-time running';
     statusEl.textContent = ETAPA_INFO[state.etapa].nombre + ' en progreso...';
     play.innerHTML = '⏸ Pausar'; play.className = 'btn-xl btn-pause';
     stop.style.display = 'flex'; tickCrono('c-time');
   } else if (crono.corriendo) {
     crono.corriendo = false; crono.pausado = true; crono.pausas++;
-    clearInterval(crono.interval);
-    timeEl.className = 'crono-time paused'; statusEl.textContent = 'En pausa';
-    pausasEl.style.display = 'block';
+    clearInterval(crono.interval); timeEl.className = 'crono-time paused';
+    statusEl.textContent = 'En pausa'; pausasEl.style.display = 'block';
     pausasEl.textContent = crono.pausas + (crono.pausas===1?' pausa':' pausas');
     play.innerHTML = '▶ Continuar'; play.className = 'btn-xl btn-play';
   } else {
@@ -571,19 +529,29 @@ async function guardarEtapa() {
   datos.sesiones.push({ trabajo_id: state.trabajo.id, etapa: state.etapa });
   ir('s-resumen');
   try {
-    await sheetsAppend('sesiones!A:J', [[
-      'S-'+Date.now(), new Date().toISOString().split('T')[0],
-      state.operario.id, state.trabajo.id, '',
-      state.etapa, crono.segundos, crono.pausas, cant, info.unidad
-    ]]);
-  } catch(e) { console.error('Error guardando:', e); }
+    await scriptCall({
+      action: 'guardarSesion',
+      email: userEmail,
+      data: JSON.stringify({
+        id: 'S-'+Date.now(),
+        fecha: new Date().toISOString().split('T')[0],
+        operario_id: state.operario.id,
+        trabajo_id: state.trabajo.id,
+        modulo_id: '',
+        etapa: state.etapa,
+        segundos: crono.segundos,
+        pausas: crono.pausas,
+        cantidad: cant,
+        unidad: info.unidad
+      })
+    });
+  } catch(e) { console.error('Error guardando etapa:', e); }
 }
 
 // ─── MÓDULOS ──────────────────────────────
 function irModulos() {
   document.getElementById('m-trabajo-nombre').textContent = state.trabajo.cliente;
-  renderModulos();
-  ir('s-modulos');
+  renderModulos(); ir('s-modulos');
 }
 
 function renderModulos() {
@@ -654,15 +622,14 @@ function accionCronoArmado() {
   const statusEl = document.getElementById('a-status');
   const pausasEl = document.getElementById('a-pausas');
   if (!crono.corriendo && !crono.pausado) {
-    crono.corriendo = true;
-    timeEl.className = 'crono-time running'; statusEl.textContent = 'Armado en progreso...';
+    crono.corriendo = true; timeEl.className = 'crono-time running';
+    statusEl.textContent = 'Armado en progreso...';
     play.innerHTML = '⏸ Pausar'; play.className = 'btn-xl btn-pause';
     stop.style.display = 'flex'; tickCrono('a-time');
   } else if (crono.corriendo) {
     crono.corriendo = false; crono.pausado = true; crono.pausas++;
-    clearInterval(crono.interval);
-    timeEl.className = 'crono-time paused'; statusEl.textContent = 'En pausa';
-    pausasEl.style.display = 'block';
+    clearInterval(crono.interval); timeEl.className = 'crono-time paused';
+    statusEl.textContent = 'En pausa'; pausasEl.style.display = 'block';
     pausasEl.textContent = crono.pausas + (crono.pausas===1?' pausa':' pausas');
     play.innerHTML = '▶ Continuar'; play.className = 'btn-xl btn-play';
   } else {
@@ -682,17 +649,30 @@ async function guardarArmado() {
   mostrarResumen(m.nombre, crono.segundos, crono.pausas, ritmo, 'piezas');
   ir('s-resumen');
   try {
+    await scriptCall({
+      action: 'marcarModulo',
+      email: userEmail,
+      data: JSON.stringify({ modulo_id: m.id, trabajo_id: m.trabajo_id })
+    });
+    await scriptCall({
+      action: 'guardarSesion',
+      email: userEmail,
+      data: JSON.stringify({
+        id: 'S-'+Date.now(),
+        fecha: new Date().toISOString().split('T')[0],
+        operario_id: state.operario.id,
+        trabajo_id: state.trabajo.id,
+        modulo_id: m.id,
+        etapa: 'armado',
+        segundos: crono.segundos,
+        pausas: crono.pausas,
+        cantidad: cant,
+        unidad: 'piezas'
+      })
+    });
     const globalIdx = datos.modulos.findIndex(mod => mod.id===m.id && mod.trabajo_id===m.trabajo_id);
-    if (globalIdx >= 0) {
-      await sheetsUpdate(`modulos!G${globalIdx+2}`, [['terminado']]);
-      datos.modulos[globalIdx].estado = 'terminado';
-    }
-    await sheetsAppend('sesiones!A:J', [[
-      'S-'+Date.now(), new Date().toISOString().split('T')[0],
-      state.operario.id, state.trabajo.id, m.id,
-      'armado', crono.segundos, crono.pausas, cant, 'piezas'
-    ]]);
-  } catch(e) { console.error('Error guardando:', e); }
+    if (globalIdx >= 0) datos.modulos[globalIdx].estado = 'terminado';
+  } catch(e) { console.error('Error guardando armado:', e); }
 }
 
 function mostrarResumen(nombre, segs, pausas, ritmo, unidad) {
