@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Taller Control</title>
 <style>
   :root {
@@ -19,93 +18,60 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--gray-bg); color: var(--text); min-height: 100vh; }
-  
   .screen { display: none; min-height: 100vh; flex-direction: column; }
   .screen.active { display: flex; }
-
-  /* TOP BAR */
   .topbar { background: var(--white); padding: 14px 16px; border-bottom: 1px solid var(--gray-border); display: flex; align-items: center; justify-content: space-between; }
   .topbar-title { font-size: 17px; font-weight: 600; }
   .topbar-sub { font-size: 12px; color: var(--gray-text); margin-top: 2px; }
   .btn-back { background: none; border: none; color: var(--blue); font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 0; }
-
-  /* CONTENT */
   .content { padding: 16px; flex: 1; overflow-y: auto; }
   .section-label { font-size: 11px; font-weight: 600; color: var(--gray-text); text-transform: uppercase; letter-spacing: 0.06em; margin: 16px 0 8px; }
   .section-label:first-child { margin-top: 0; }
-
-  /* CARDS */
   .card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-border); padding: 14px 16px; margin-bottom: 10px; }
   .card-active { border: 2px solid var(--blue); }
-  .card-btn { cursor: pointer; transition: opacity 0.15s; }
-  .card-btn:active { opacity: 0.75; transform: scale(0.99); }
-
-  /* BADGES */
+  .card-btn { cursor: pointer; }
+  .card-btn:active { opacity: 0.75; }
   .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; }
   .badge-blue { background: var(--blue-light); color: var(--blue-dark); }
   .badge-green { background: var(--green-light); color: var(--green-dark); }
   .badge-amber { background: var(--amber-light); color: var(--amber-dark); }
   .badge-red { background: var(--red-light); color: var(--red-dark); }
   .badge-gray { background: #EFEFEF; color: #555; }
-
-  /* BOTONES GRANDES */
-  .btn-xl { width: 100%; padding: 18px; border-radius: var(--radius); border: none; font-size: 17px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; transition: opacity 0.15s, transform 0.1s; }
+  .btn-xl { width: 100%; padding: 18px; border-radius: var(--radius); border: none; font-size: 17px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; }
   .btn-xl:active { opacity: 0.85; transform: scale(0.98); }
   .btn-play { background: var(--green); color: #fff; }
   .btn-pause { background: var(--amber); color: #fff; }
   .btn-stop { background: var(--red); color: #fff; }
   .btn-blue { background: var(--blue); color: #fff; }
-
-  .btn-md { width: 100%; padding: 13px; border-radius: var(--radius-sm); border: 1px solid var(--gray-border); background: var(--white); font-size: 15px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 10px; margin-bottom: 8px; color: var(--text); transition: opacity 0.15s; }
-  .btn-md:active { opacity: 0.75; }
-
-  /* USER LIST */
-  .user-btn { width: 100%; padding: 16px; border-radius: var(--radius); border: 1px solid var(--gray-border); background: var(--white); font-size: 16px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 14px; margin-bottom: 10px; color: var(--text); transition: all 0.15s; }
+  .btn-md { width: 100%; padding: 13px; border-radius: var(--radius-sm); border: 1px solid var(--gray-border); background: var(--white); font-size: 15px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 10px; margin-bottom: 8px; color: var(--text); justify-content: center; }
+  .user-btn { width: 100%; padding: 16px; border-radius: var(--radius); border: 1px solid var(--gray-border); background: var(--white); font-size: 16px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 14px; margin-bottom: 10px; color: var(--text); }
   .user-btn:active { background: var(--blue-light); border-color: var(--blue); }
   .user-avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--blue-light); color: var(--blue); font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-
-  /* ETAPAS GRID */
   .etapa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .etapa-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-border); padding: 18px 10px; text-align: center; cursor: pointer; transition: all 0.15s; }
+  .etapa-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-border); padding: 18px 10px; text-align: center; cursor: pointer; }
   .etapa-card:active { border-color: var(--blue); background: var(--blue-light); transform: scale(0.97); }
   .etapa-icon { font-size: 32px; margin-bottom: 8px; }
   .etapa-nombre { font-size: 14px; font-weight: 600; }
   .etapa-detalle { font-size: 11px; color: var(--gray-text); margin-top: 3px; }
-
-  /* INFO PRECARGADA */
   .info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
   .info-box { background: var(--gray-bg); border-radius: var(--radius-sm); padding: 12px 14px; }
   .info-label { font-size: 11px; color: var(--gray-text); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
   .info-val { font-size: 20px; font-weight: 700; }
-
-  /* CRONÓMETRO */
   .crono-box { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-border); padding: 24px 16px; text-align: center; margin-bottom: 14px; }
   .crono-time { font-size: 54px; font-weight: 300; font-variant-numeric: tabular-nums; letter-spacing: 2px; color: var(--text); font-family: 'Courier New', monospace; }
   .crono-time.running { color: var(--green); }
   .crono-time.paused { color: var(--amber); }
   .crono-status { font-size: 13px; color: var(--gray-text); margin-top: 6px; }
   .crono-pausas { font-size: 12px; color: var(--amber); margin-top: 4px; font-weight: 500; }
-
-  /* BTN ROW */
-  .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-  .btn-row-single { margin-bottom: 10px; }
-
-  /* MÓDULOS */
-  .modulo-item { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-border); padding: 14px 16px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.15s; }
+  .modulo-item { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-border); padding: 14px 16px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
   .modulo-item:active { border-color: var(--blue); background: var(--blue-light); }
   .modulo-item.hecho { opacity: 0.45; cursor: not-allowed; }
   .modulo-nombre { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
   .modulo-detalle { font-size: 12px; color: var(--gray-text); }
-  .modulo-arrow { color: var(--gray-text); font-size: 18px; }
-
-  /* PLANO */
-  .plano-box { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-border); overflow: hidden; margin-bottom: 14px; min-height: 180px; display: flex; align-items: center; justify-content: center; position: relative; }
+  .plano-box { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-border); overflow: hidden; margin-bottom: 14px; min-height: 180px; display: flex; align-items: center; justify-content: center; }
   .plano-img { width: 100%; height: auto; max-height: 250px; object-fit: contain; }
   .plano-placeholder { text-align: center; padding: 24px; color: var(--gray-text); }
   .plano-placeholder .icon { font-size: 40px; margin-bottom: 8px; }
-  .plano-placeholder p { font-size: 13px; }
-
-  /* RESUMEN */
   .resumen-header { text-align: center; padding: 24px 16px 16px; }
   .resumen-icon { font-size: 56px; }
   .resumen-titulo { font-size: 20px; font-weight: 700; margin-top: 8px; }
@@ -114,32 +80,22 @@
   .stat-box { background: var(--white); border-radius: var(--radius-sm); border: 1px solid var(--gray-border); padding: 14px; text-align: center; }
   .stat-num { font-size: 24px; font-weight: 700; }
   .stat-lbl { font-size: 11px; color: var(--gray-text); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.04em; }
-
-  /* LOGIN */
   .login-screen { background: var(--white); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px; }
-  .login-logo { font-size: 48px; margin-bottom: 16px; }
-  .login-title { font-size: 24px; font-weight: 700; margin-bottom: 6px; text-align: center; }
-  .login-sub { font-size: 14px; color: var(--gray-text); margin-bottom: 32px; text-align: center; }
+  .login-logo { font-size: 56px; margin-bottom: 16px; }
+  .login-title { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+  .login-sub { font-size: 14px; color: var(--gray-text); margin-bottom: 40px; text-align: center; }
   .btn-google { background: var(--blue); color: #fff; border: none; border-radius: var(--radius); padding: 16px 24px; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; justify-content: center; }
-  .error-msg { background: var(--red-light); color: var(--red-dark); border-radius: var(--radius-sm); padding: 12px; font-size: 13px; margin-top: 16px; display: none; text-align: center; }
-  .loading { text-align: center; color: var(--gray-text); font-size: 14px; margin-top: 16px; display: none; }
-
-  /* SPINNER */
-  .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
+  .btn-google:active { opacity: 0.85; }
+  .error-box { background: var(--red-light); color: var(--red-dark); border-radius: var(--radius-sm); padding: 14px; font-size: 13px; margin-top: 16px; display: none; text-align: center; line-height: 1.5; }
+  .sync-indicator { font-size: 11px; color: var(--gray-text); text-align: center; padding: 6px; }
   .trabajo-meta { display: flex; gap: 16px; margin-top: 10px; }
   .trabajo-meta-item .lbl { font-size: 11px; color: var(--gray-text); }
   .trabajo-meta-item .val { font-size: 14px; font-weight: 600; }
-
-  .sync-indicator { font-size: 11px; color: var(--gray-text); text-align: center; padding: 6px; }
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════ -->
-<!-- PANTALLA: LOGIN                         -->
-<!-- ═══════════════════════════════════════ -->
+<!-- LOGIN -->
 <div id="s-login" class="login-screen">
   <div class="login-logo">🪚</div>
   <div class="login-title">Taller Control</div>
@@ -148,134 +104,92 @@
     <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
     Entrar con Google
   </button>
-  <div class="error-msg" id="login-error"></div>
-  <div class="loading" id="login-loading">⏳ Verificando acceso...</div>
+  <div class="error-box" id="login-error"></div>
 </div>
 
-<!-- ═══════════════════════════════════════ -->
-<!-- PANTALLA: SELECCIÓN DE OPERARIO        -->
-<!-- ═══════════════════════════════════════ -->
+<!-- OPERARIO -->
 <div id="s-operario" class="screen">
   <div class="topbar">
-    <div>
-      <div class="topbar-title">🪚 Taller Control</div>
-      <div class="topbar-sub" id="op-fecha"></div>
-    </div>
+    <div><div class="topbar-title">🪚 Taller Control</div><div class="topbar-sub" id="op-fecha"></div></div>
     <button class="btn-back" onclick="cerrarSesion()" style="color:var(--gray-text);font-size:13px">Salir</button>
   </div>
   <div class="content">
     <div class="section-label">¿Quién sos?</div>
     <div id="lista-operarios"></div>
-    <div class="sync-indicator" id="sync-op">Cargando...</div>
+    <div class="sync-indicator" id="sync-op"></div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════ -->
-<!-- PANTALLA: SELECCIÓN DE TRABAJO         -->
-<!-- ═══════════════════════════════════════ -->
+<!-- TRABAJO -->
 <div id="s-trabajo" class="screen">
   <div class="topbar">
     <button class="btn-back" onclick="ir('s-operario')">← Volver</button>
-    <div style="text-align:right">
-      <div class="topbar-title" id="t-operario-nombre"></div>
-      <div class="topbar-sub">Seleccionar trabajo</div>
-    </div>
+    <div style="text-align:right"><div class="topbar-title" id="t-operario-nombre"></div><div class="topbar-sub">Seleccionar trabajo</div></div>
   </div>
   <div class="content">
     <div class="section-label">Trabajo activo</div>
     <div id="lista-trabajos-activos"></div>
     <div class="section-label">Próximos</div>
     <div id="lista-trabajos-pendientes"></div>
-    <div class="sync-indicator" id="sync-tr">Cargando...</div>
+    <div class="sync-indicator" id="sync-tr"></div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════ -->
-<!-- PANTALLA: SELECCIÓN DE ETAPA           -->
-<!-- ═══════════════════════════════════════ -->
+<!-- ETAPA -->
 <div id="s-etapa" class="screen">
   <div class="topbar">
     <button class="btn-back" onclick="ir('s-trabajo')">← Volver</button>
-    <div style="text-align:right">
-      <div class="topbar-title" id="e-trabajo-nombre"></div>
-      <div class="topbar-sub" id="e-operario-nombre"></div>
-    </div>
+    <div style="text-align:right"><div class="topbar-title" id="e-trabajo-nombre"></div><div class="topbar-sub" id="e-operario-nombre"></div></div>
   </div>
   <div class="content">
     <div class="section-label">¿Qué etapa vas a hacer?</div>
     <div class="etapa-grid">
-      <div class="etapa-card" id="etapa-descarga" onclick="irEtapaSimple('descarga')">
-        <div class="etapa-icon">🚛</div>
-        <div class="etapa-nombre">Descarga</div>
+      <div class="etapa-card" onclick="irEtapaSimple('descarga')">
+        <div class="etapa-icon">🚛</div><div class="etapa-nombre">Descarga</div>
         <div class="etapa-detalle" id="e-piezas-descarga">— piezas</div>
       </div>
-      <div class="etapa-card" id="etapa-corte" onclick="irEtapaSimple('corte')">
-        <div class="etapa-icon">⚙️</div>
-        <div class="etapa-nombre">Corte / rebaje</div>
+      <div class="etapa-card" onclick="irEtapaSimple('corte')">
+        <div class="etapa-icon">⚙️</div><div class="etapa-nombre">Corte / rebaje</div>
         <div class="etapa-detalle" id="e-piezas-corte">— piezas</div>
       </div>
-      <div class="etapa-card" id="etapa-clasificacion" onclick="irEtapaSimple('clasificacion')">
-        <div class="etapa-icon">📦</div>
-        <div class="etapa-nombre">Clasificación</div>
+      <div class="etapa-card" onclick="irEtapaSimple('clasificacion')">
+        <div class="etapa-icon">📦</div><div class="etapa-nombre">Clasificación</div>
         <div class="etapa-detalle" id="e-mods-clasificacion">— módulos</div>
       </div>
       <div class="etapa-card" onclick="irModulos()">
-        <div class="etapa-icon">🔧</div>
-        <div class="etapa-nombre">Armado</div>
+        <div class="etapa-icon">🔧</div><div class="etapa-nombre">Armado</div>
         <div class="etapa-detalle">Elegir módulo</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════ -->
-<!-- PANTALLA: CRONÓMETRO ETAPA SIMPLE      -->
-<!-- ═══════════════════════════════════════ -->
+<!-- CRONÓMETRO ETAPA SIMPLE -->
 <div id="s-crono" class="screen">
   <div class="topbar">
     <button class="btn-back" onclick="confirmarVolver('s-etapa')">← Volver</button>
-    <div style="text-align:right">
-      <div class="topbar-title" id="c-etapa-nombre"></div>
-      <div class="topbar-sub" id="c-trabajo-nombre"></div>
-    </div>
+    <div style="text-align:right"><div class="topbar-title" id="c-etapa-nombre"></div><div class="topbar-sub" id="c-trabajo-nombre"></div></div>
   </div>
   <div class="content">
     <div class="info-row">
-      <div class="info-box">
-        <div class="info-label">Cantidad</div>
-        <div class="info-val" id="c-cantidad">—</div>
-      </div>
-      <div class="info-box">
-        <div class="info-label">Unidad</div>
-        <div class="info-val" id="c-unidad">—</div>
-      </div>
+      <div class="info-box"><div class="info-label">Cantidad</div><div class="info-val" id="c-cantidad">—</div></div>
+      <div class="info-box"><div class="info-label">Unidad</div><div class="info-val" id="c-unidad">—</div></div>
     </div>
     <div class="crono-box">
       <div class="crono-time" id="c-time">00:00:00</div>
       <div class="crono-status" id="c-status">Listo para iniciar</div>
       <div class="crono-pausas" id="c-pausas" style="display:none"></div>
     </div>
-    <div class="btn-row" id="c-btn-row">
-      <button class="btn-xl btn-play" id="c-btn-play" onclick="accionCrono()" style="grid-column:1/-1">
-        ▶ Iniciar
-      </button>
-    </div>
-    <button class="btn-xl btn-stop" id="c-btn-stop" onclick="guardarEtapa()" style="display:none">
-      ⏹ Terminar y guardar
-    </button>
+    <button class="btn-xl btn-play" id="c-btn-play" onclick="accionCrono()">▶ Iniciar</button>
+    <button class="btn-xl btn-stop" id="c-btn-stop" onclick="guardarEtapa()" style="display:none">⏹ Terminar y guardar</button>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════ -->
-<!-- PANTALLA: LISTA DE MÓDULOS             -->
-<!-- ═══════════════════════════════════════ -->
+<!-- MÓDULOS -->
 <div id="s-modulos" class="screen">
   <div class="topbar">
     <button class="btn-back" onclick="ir('s-etapa')">← Volver</button>
-    <div style="text-align:right">
-      <div class="topbar-title">Armado</div>
-      <div class="topbar-sub" id="m-trabajo-nombre"></div>
-    </div>
+    <div style="text-align:right"><div class="topbar-title">Armado</div><div class="topbar-sub" id="m-trabajo-nombre"></div></div>
   </div>
   <div class="content">
     <div class="section-label">Módulos del trabajo</div>
@@ -284,16 +198,11 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════ -->
-<!-- PANTALLA: CRONÓMETRO ARMADO            -->
-<!-- ═══════════════════════════════════════ -->
+<!-- CRONÓMETRO ARMADO -->
 <div id="s-armado" class="screen">
   <div class="topbar">
     <button class="btn-back" onclick="confirmarVolver('s-modulos')">← Volver</button>
-    <div style="text-align:right">
-      <div class="topbar-title" id="a-modulo-nombre"></div>
-      <div class="topbar-sub" id="a-trabajo-nombre"></div>
-    </div>
+    <div style="text-align:right"><div class="topbar-title" id="a-modulo-nombre"></div><div class="topbar-sub" id="a-trabajo-nombre"></div></div>
   </div>
   <div class="content">
     <div class="plano-box" id="a-plano-box">
@@ -304,38 +213,22 @@
       <img id="a-plano-img" class="plano-img" style="display:none" alt="Plano del módulo">
     </div>
     <div class="info-row">
-      <div class="info-box">
-        <div class="info-label">Piezas</div>
-        <div class="info-val" id="a-piezas">—</div>
-      </div>
-      <div class="info-box">
-        <div class="info-label">Complejidad</div>
-        <div class="info-val" id="a-complejidad">—</div>
-      </div>
+      <div class="info-box"><div class="info-label">Piezas</div><div class="info-val" id="a-piezas">—</div></div>
+      <div class="info-box"><div class="info-label">Complejidad</div><div class="info-val" id="a-complejidad">—</div></div>
     </div>
     <div class="crono-box">
       <div class="crono-time" id="a-time">00:00:00</div>
       <div class="crono-status" id="a-status">Listo para iniciar</div>
       <div class="crono-pausas" id="a-pausas" style="display:none"></div>
     </div>
-    <div class="btn-row" id="a-btn-row">
-      <button class="btn-xl btn-play" id="a-btn-play" onclick="accionCronoArmado()" style="grid-column:1/-1">
-        ▶ Iniciar armado
-      </button>
-    </div>
-    <button class="btn-xl btn-stop" id="a-btn-stop" onclick="guardarArmado()" style="display:none">
-      ⏹ Módulo terminado — guardar
-    </button>
+    <button class="btn-xl btn-play" id="a-btn-play" onclick="accionCronoArmado()">▶ Iniciar armado</button>
+    <button class="btn-xl btn-stop" id="a-btn-stop" onclick="guardarArmado()" style="display:none">⏹ Módulo terminado — guardar</button>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════ -->
-<!-- PANTALLA: RESUMEN GUARDADO             -->
-<!-- ═══════════════════════════════════════ -->
+<!-- RESUMEN -->
 <div id="s-resumen" class="screen">
-  <div class="topbar">
-    <div class="topbar-title">Registro guardado</div>
-  </div>
+  <div class="topbar"><div class="topbar-title">Registro guardado</div></div>
   <div class="content">
     <div class="resumen-header">
       <div class="resumen-icon">✅</div>
@@ -349,29 +242,21 @@
       <div class="stat-box"><div class="stat-num" id="r-operario"></div><div class="stat-lbl">Operario</div></div>
     </div>
     <button class="btn-xl btn-blue" onclick="ir('s-etapa')">+ Nueva etapa</button>
-    <button class="btn-md" onclick="ir('s-operario')" style="justify-content:center">🏠 Inicio</button>
+    <button class="btn-md" onclick="ir('s-operario')">🏠 Inicio</button>
   </div>
 </div>
 
 <script>
-// ─────────────────────────────────────────
-// CONFIG
-// ─────────────────────────────────────────
-const CLIENT_ID = '220165516778-31l2lubvhdi78t43fk3sd59bmjb1opvc.apps.googleusercontent.com';
-const SHEET_ID  = '1GzE-KEZ-s_LxLqdgA8283tPy--yxWMY6MEksa6dgUFk';
-const SCOPES    = 'https://www.googleapis.com/auth/spreadsheets';
+const CLIENT_ID  = '220165516778-31l2lubvhdi78t43fk3sd59bmjb1opvc.apps.googleusercontent.com';
+const SHEET_ID   = '1GzE-KEZ-s_LxLqdgA8283tPy--yxWMY6MEksa6dgUFk';
+const SCOPES     = 'https://www.googleapis.com/auth/spreadsheets';
+const REDIRECT   = 'https://mnbudino-velez.github.io/taller-control/';
 
-// ─────────────────────────────────────────
-// ESTADO
-// ─────────────────────────────────────────
 let token = null;
 let state = { operario: null, trabajo: null, etapa: null, moduloActual: null };
 let crono = { segundos: 0, pausas: 0, corriendo: false, pausado: false, interval: null };
 let datos = { operarios: [], trabajos: [], modulos: [] };
 
-// ─────────────────────────────────────────
-// NAVEGACIÓN
-// ─────────────────────────────────────────
 function ir(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -385,13 +270,10 @@ function confirmarVolver(destino) {
   ir(destino);
 }
 
-// ─────────────────────────────────────────
-// AUTH GOOGLE
-// ─────────────────────────────────────────
 function iniciarLogin() {
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
-    redirect_uri: window.location.origin + window.location.pathname,
+    redirect_uri: REDIRECT,
     response_type: 'token',
     scope: SCOPES,
     prompt: 'select_account'
@@ -402,20 +284,27 @@ function iniciarLogin() {
 function cerrarSesion() {
   token = null;
   sessionStorage.removeItem('gtoken');
-  document.getElementById('s-login').style.display = 'flex';
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('s-login').style.display = 'flex';
 }
 
 function checkAuth() {
-  // Chequear hash de redirect OAuth
-  const hash = new URLSearchParams(window.location.hash.replace('#',''));
-  if (hash.get('access_token')) {
-    token = hash.get('access_token');
-    sessionStorage.setItem('gtoken', token);
-    window.history.replaceState({}, '', window.location.pathname);
-  } else {
-    token = sessionStorage.getItem('gtoken');
+  // Leer token del hash (redirect OAuth)
+  if (window.location.hash) {
+    const hash = new URLSearchParams(window.location.hash.replace('#', ''));
+    const t = hash.get('access_token');
+    const err = hash.get('error');
+    if (t) {
+      token = t;
+      sessionStorage.setItem('gtoken', token);
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (err) {
+      mostrarError('Error de acceso: ' + err + '. Verificá que tu cuenta tenga permisos.');
+      return;
+    }
   }
+
+  if (!token) token = sessionStorage.getItem('gtoken');
 
   if (token) {
     document.getElementById('s-login').style.display = 'none';
@@ -425,9 +314,12 @@ function checkAuth() {
   }
 }
 
-// ─────────────────────────────────────────
-// API SHEETS
-// ─────────────────────────────────────────
+function mostrarError(msg) {
+  const el = document.getElementById('login-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
 async function sheetsGet(range) {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(range)}`;
   const r = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
@@ -456,9 +348,6 @@ async function sheetsUpdate(range, values) {
   });
 }
 
-// ─────────────────────────────────────────
-// CARGAR DATOS
-// ─────────────────────────────────────────
 async function cargarDatos() {
   try {
     const [ops, trajs, mods] = await Promise.all([
@@ -466,29 +355,20 @@ async function cargarDatos() {
       sheetsGet('trabajos!A2:F'),
       sheetsGet('modulos!A2:H')
     ]);
-
-    datos.operarios = ops.filter(r => r[2] === 'si').map(r => ({ id: r[0], nombre: r[1] }));
-    datos.trabajos  = trajs.map(r => ({ id: r[0], cliente: r[1], modulos: r[2], piezas: r[3], fecha: r[4], estado: r[5] }));
-    datos.modulos   = mods.map(r => ({ id: r[0], trabajo_id: r[1], nombre: r[2], medidas: r[3], piezas: r[4], complejidad: r[5], estado: r[6], url_plano: r[7] || '' }));
-  } catch(e) {
-    console.error('Error cargando datos:', e);
-  }
+    datos.operarios = (ops || []).filter(r => r[2] === 'si').map(r => ({ id: r[0], nombre: r[1] }));
+    datos.trabajos  = (trajs || []).map(r => ({ id: r[0], cliente: r[1], modulos: r[2], piezas: r[3], fecha: r[4], estado: r[5] }));
+    datos.modulos   = (mods || []).map(r => ({ id: r[0], trabajo_id: r[1], nombre: r[2], medidas: r[3], piezas: r[4], complejidad: r[5], estado: r[6], url_plano: r[7] || '' }));
+  } catch(e) { console.error('Error cargando datos:', e); }
 }
 
-// ─────────────────────────────────────────
-// INICIAR APP
-// ─────────────────────────────────────────
 async function iniciarApp() {
-  document.getElementById('sync-op').textContent = 'Cargando operarios...';
+  document.getElementById('sync-op').textContent = 'Cargando...';
   await cargarDatos();
   renderOperarios();
   ir('s-operario');
   document.getElementById('op-fecha').textContent = new Date().toLocaleDateString('es-AR', { weekday:'long', day:'numeric', month:'long' });
 }
 
-// ─────────────────────────────────────────
-// RENDER OPERARIOS
-// ─────────────────────────────────────────
 function renderOperarios() {
   const cont = document.getElementById('lista-operarios');
   cont.innerHTML = '';
@@ -510,17 +390,12 @@ function elegirOperario(op) {
   ir('s-trabajo');
 }
 
-// ─────────────────────────────────────────
-// RENDER TRABAJOS
-// ─────────────────────────────────────────
 function renderTrabajos() {
-  const activos = datos.trabajos.filter(t => t.estado === 'en_curso');
+  const activos   = datos.trabajos.filter(t => t.estado === 'en_curso');
   const pendientes = datos.trabajos.filter(t => t.estado === 'pendiente');
-
   const contA = document.getElementById('lista-trabajos-activos');
   const contP = document.getElementById('lista-trabajos-pendientes');
   contA.innerHTML = ''; contP.innerHTML = '';
-
   activos.forEach(t => contA.appendChild(crearCardTrabajo(t, true)));
   pendientes.forEach(t => contP.appendChild(crearCardTrabajo(t, false)));
   document.getElementById('sync-tr').textContent = activos.length + ' activo(s) · ' + pendientes.length + ' pendiente(s)';
@@ -528,14 +403,12 @@ function renderTrabajos() {
 
 function crearCardTrabajo(t, activo) {
   const div = document.createElement('div');
-  div.className = 'card' + (activo ? ' card-active card-btn' : ' card-btn');
-  div.style.opacity = activo ? '1' : '0.65';
+  div.className = 'card card-btn' + (activo ? ' card-active' : '');
+  div.style.opacity = activo ? '1' : '0.6';
   div.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-      <div>
-        <div style="font-size:12px;color:var(--gray-text);margin-bottom:2px">${t.id}</div>
-        <div style="font-size:16px;font-weight:700">${t.cliente}</div>
-      </div>
+      <div><div style="font-size:12px;color:var(--gray-text);margin-bottom:2px">${t.id}</div>
+      <div style="font-size:16px;font-weight:700">${t.cliente}</div></div>
       <span class="badge ${activo ? 'badge-blue' : 'badge-gray'}">${activo ? 'En curso' : 'Pendiente'}</span>
     </div>
     <div class="trabajo-meta">
@@ -563,13 +436,10 @@ function elegirTrabajo(t) {
   ir('s-etapa');
 }
 
-// ─────────────────────────────────────────
-// ETAPAS SIMPLES
-// ─────────────────────────────────────────
 const ETAPA_INFO = {
-  descarga:       { nombre: 'Descarga', unidad: 'piezas', getCant: t => t.piezas },
-  corte:          { nombre: 'Corte / rebaje', unidad: 'piezas', getCant: t => t.piezas },
-  clasificacion:  { nombre: 'Clasificación', unidad: 'módulos', getCant: t => t.modulos }
+  descarga:      { nombre: 'Descarga', unidad: 'piezas', getCant: t => t.piezas },
+  corte:         { nombre: 'Corte / rebaje', unidad: 'piezas', getCant: t => t.piezas },
+  clasificacion: { nombre: 'Clasificación', unidad: 'módulos', getCant: t => t.modulos }
 };
 
 function irEtapaSimple(etapa) {
@@ -584,17 +454,13 @@ function irEtapaSimple(etapa) {
   document.getElementById('c-time').className = 'crono-time';
   document.getElementById('c-status').textContent = 'Listo para iniciar';
   document.getElementById('c-pausas').style.display = 'none';
-  document.getElementById('c-btn-play').style.gridColumn = '1/-1';
+  document.getElementById('c-btn-play').style.display = 'flex';
   document.getElementById('c-btn-play').textContent = '▶ Iniciar';
   document.getElementById('c-btn-play').className = 'btn-xl btn-play';
-  document.getElementById('c-btn-play').style.display = 'flex';
   document.getElementById('c-btn-stop').style.display = 'none';
   ir('s-crono');
 }
 
-// ─────────────────────────────────────────
-// CRONÓMETRO GENÉRICO
-// ─────────────────────────────────────────
 function pad(n) { return String(n).padStart(2,'0'); }
 function fmt(s) { return pad(Math.floor(s/3600))+':'+pad(Math.floor((s%3600)/60))+':'+pad(s%60); }
 
@@ -616,14 +482,11 @@ function accionCrono() {
   const timeEl = document.getElementById('c-time');
   const statusEl = document.getElementById('c-status');
   const pausasEl = document.getElementById('c-pausas');
-
   if (!crono.corriendo && !crono.pausado) {
     crono.corriendo = true;
     timeEl.className = 'crono-time running';
     statusEl.textContent = ETAPA_INFO[state.etapa].nombre + ' en progreso...';
-    play.style.gridColumn = '';
-    play.innerHTML = '⏸ Pausar';
-    play.className = 'btn-xl btn-pause';
+    play.innerHTML = '⏸ Pausar'; play.className = 'btn-xl btn-pause';
     stop.style.display = 'flex';
     tickCrono('c-time');
   } else if (crono.corriendo) {
@@ -633,14 +496,12 @@ function accionCrono() {
     statusEl.textContent = 'En pausa';
     pausasEl.style.display = 'block';
     pausasEl.textContent = crono.pausas + (crono.pausas === 1 ? ' pausa' : ' pausas');
-    play.innerHTML = '▶ Continuar';
-    play.className = 'btn-xl btn-play';
+    play.innerHTML = '▶ Continuar'; play.className = 'btn-xl btn-play';
   } else {
     crono.pausado = false; crono.corriendo = true;
     timeEl.className = 'crono-time running';
     statusEl.textContent = ETAPA_INFO[state.etapa].nombre + ' en progreso...';
-    play.innerHTML = '⏸ Pausar';
-    play.className = 'btn-xl btn-pause';
+    play.innerHTML = '⏸ Pausar'; play.className = 'btn-xl btn-pause';
     tickCrono('c-time');
   }
 }
@@ -651,23 +512,18 @@ async function guardarEtapa() {
   const cant = parseInt(info.getCant(state.trabajo)) || 0;
   const horas = crono.segundos / 3600;
   const ritmo = horas > 0 ? Math.round(cant / horas) : 0;
-  const id = 'S-' + Date.now();
-  const fecha = new Date().toISOString().split('T')[0];
-
   mostrarResumen(info.nombre, crono.segundos, crono.pausas, ritmo, info.unidad);
-
+  ir('s-resumen');
   try {
     await sheetsAppend('sesiones!A:J', [[
-      id, fecha, state.operario.id, state.trabajo.id, '',
+      'S-' + Date.now(),
+      new Date().toISOString().split('T')[0],
+      state.operario.id, state.trabajo.id, '',
       state.etapa, crono.segundos, crono.pausas, cant, info.unidad
     ]]);
   } catch(e) { console.error('Error guardando:', e); }
-  ir('s-resumen');
 }
 
-// ─────────────────────────────────────────
-// MÓDULOS
-// ─────────────────────────────────────────
 function irModulos() {
   document.getElementById('m-trabajo-nombre').textContent = state.trabajo.cliente;
   renderModulos();
@@ -678,15 +534,13 @@ function renderModulos() {
   const mods = datos.modulos.filter(m => m.trabajo_id === state.trabajo.id);
   const cont = document.getElementById('lista-modulos');
   cont.innerHTML = '';
-
   if (mods.length === 0) {
     cont.innerHTML = '<div style="color:var(--gray-text);font-size:14px;text-align:center;padding:24px">No hay módulos cargados para este trabajo</div>';
     return;
   }
-
   mods.forEach(m => {
     const hecho = m.estado === 'terminado';
-    const compColor = { alta: 'badge-red', media: 'badge-amber', baja: 'badge-green' }[m.complejidad] || 'badge-gray';
+    const compColor = { alta:'badge-red', media:'badge-amber', baja:'badge-green' }[m.complejidad] || 'badge-gray';
     const div = document.createElement('div');
     div.className = 'modulo-item' + (hecho ? ' hecho' : '');
     div.innerHTML = `
@@ -698,14 +552,12 @@ function renderModulos() {
           ${hecho ? '<span class="badge badge-gray">✓ Terminado</span>' : ''}
         </div>
       </div>
-      <div class="modulo-arrow">${hecho ? '' : '›'}</div>`;
+      <div style="color:var(--gray-text);font-size:18px">${hecho ? '' : '›'}</div>`;
     if (!hecho) div.onclick = () => abrirModulo(m);
     cont.appendChild(div);
   });
-
-  const total = mods.length;
   const hechos = mods.filter(m => m.estado === 'terminado').length;
-  document.getElementById('sync-mod').textContent = hechos + ' de ' + total + ' módulos terminados';
+  document.getElementById('sync-mod').textContent = hechos + ' de ' + mods.length + ' módulos terminados';
 }
 
 function abrirModulo(m) {
@@ -719,26 +571,21 @@ function abrirModulo(m) {
   document.getElementById('a-time').className = 'crono-time';
   document.getElementById('a-status').textContent = 'Listo para iniciar';
   document.getElementById('a-pausas').style.display = 'none';
-  document.getElementById('a-btn-play').style.gridColumn = '1/-1';
+  document.getElementById('a-btn-play').style.display = 'flex';
   document.getElementById('a-btn-play').innerHTML = '▶ Iniciar armado';
   document.getElementById('a-btn-play').className = 'btn-xl btn-play';
-  document.getElementById('a-btn-play').style.display = 'flex';
   document.getElementById('a-btn-stop').style.display = 'none';
-
-  // Plano
   const img = document.getElementById('a-plano-img');
-  const placeholder = document.getElementById('a-plano-placeholder');
-  if (m.url_plano && m.url_plano.trim() !== '') {
-    const directUrl = m.url_plano.replace('/view', '').replace('file/d/','uc?id=').replace('https://drive.google.com/uc?id=', 'https://drive.google.com/uc?export=view&id=');
-    img.src = directUrl;
-    img.style.display = 'block';
-    placeholder.style.display = 'none';
+  const ph  = document.getElementById('a-plano-placeholder');
+  if (m.url_plano && m.url_plano.trim()) {
+    let url = m.url_plano;
+    const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (match) url = `https://drive.google.com/uc?export=view&id=${match[1]}`;
+    img.src = url; img.style.display = 'block'; ph.style.display = 'none';
   } else {
-    img.style.display = 'none';
-    placeholder.style.display = 'block';
+    img.style.display = 'none'; ph.style.display = 'block';
     document.getElementById('a-plano-txt').textContent = m.nombre + ' · ' + m.medidas;
   }
-
   ir('s-armado');
 }
 
@@ -748,14 +595,11 @@ function accionCronoArmado() {
   const timeEl = document.getElementById('a-time');
   const statusEl = document.getElementById('a-status');
   const pausasEl = document.getElementById('a-pausas');
-
   if (!crono.corriendo && !crono.pausado) {
     crono.corriendo = true;
     timeEl.className = 'crono-time running';
     statusEl.textContent = 'Armado en progreso...';
-    play.style.gridColumn = '';
-    play.innerHTML = '⏸ Pausar';
-    play.className = 'btn-xl btn-pause';
+    play.innerHTML = '⏸ Pausar'; play.className = 'btn-xl btn-pause';
     stop.style.display = 'flex';
     tickCrono('a-time');
   } else if (crono.corriendo) {
@@ -765,14 +609,12 @@ function accionCronoArmado() {
     statusEl.textContent = 'En pausa';
     pausasEl.style.display = 'block';
     pausasEl.textContent = crono.pausas + (crono.pausas === 1 ? ' pausa' : ' pausas');
-    play.innerHTML = '▶ Continuar';
-    play.className = 'btn-xl btn-play';
+    play.innerHTML = '▶ Continuar'; play.className = 'btn-xl btn-play';
   } else {
     crono.pausado = false; crono.corriendo = true;
     timeEl.className = 'crono-time running';
     statusEl.textContent = 'Armado en progreso...';
-    play.innerHTML = '⏸ Pausar';
-    play.className = 'btn-xl btn-pause';
+    play.innerHTML = '⏸ Pausar'; play.className = 'btn-xl btn-pause';
     tickCrono('a-time');
   }
 }
@@ -783,33 +625,23 @@ async function guardarArmado() {
   const cant = parseInt(m.piezas) || 0;
   const horas = crono.segundos / 3600;
   const ritmo = horas > 0 ? Math.round(cant / horas) : 0;
-  const id = 'S-' + Date.now();
-  const fecha = new Date().toISOString().split('T')[0];
-
-  mostrarResumen(m.nombre, crono.segundos, crono.pausas, ritmo, 'piezas/módulo');
-
-  // Marcar módulo como terminado en Sheets
+  mostrarResumen(m.nombre, crono.segundos, crono.pausas, ritmo, 'piezas');
+  ir('s-resumen');
   try {
-    const mods = datos.modulos.filter(mod => mod.trabajo_id === state.trabajo.id);
-    const idx = mods.findIndex(mod => mod.id === m.id);
-    if (idx >= 0) {
-      const allMods = datos.modulos;
-      const globalIdx = allMods.findIndex(mod => mod.id === m.id && mod.trabajo_id === m.trabajo_id);
-      const filaSheets = globalIdx + 2;
-      await sheetsUpdate(`modulos!G${filaSheets}`, [['terminado']]);
+    const globalIdx = datos.modulos.findIndex(mod => mod.id === m.id && mod.trabajo_id === m.trabajo_id);
+    if (globalIdx >= 0) {
+      await sheetsUpdate(`modulos!G${globalIdx + 2}`, [['terminado']]);
       datos.modulos[globalIdx].estado = 'terminado';
     }
     await sheetsAppend('sesiones!A:J', [[
-      id, fecha, state.operario.id, state.trabajo.id, m.id,
+      'S-' + Date.now(),
+      new Date().toISOString().split('T')[0],
+      state.operario.id, state.trabajo.id, m.id,
       'armado', crono.segundos, crono.pausas, cant, 'piezas'
     ]]);
   } catch(e) { console.error('Error guardando:', e); }
-  ir('s-resumen');
 }
 
-// ─────────────────────────────────────────
-// RESUMEN
-// ─────────────────────────────────────────
 function mostrarResumen(nombre, segs, pausas, ritmo, unidad) {
   document.getElementById('r-sub').textContent = nombre + ' · ' + state.trabajo.cliente;
   document.getElementById('r-tiempo').textContent = fmt(segs);
@@ -819,9 +651,6 @@ function mostrarResumen(nombre, segs, pausas, ritmo, unidad) {
   document.getElementById('r-operario').textContent = state.operario.nombre;
 }
 
-// ─────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────
 window.addEventListener('load', checkAuth);
 </script>
 </body>
