@@ -136,7 +136,7 @@
 </div>
 
 <!-- PIN -->
-<div id="s-pin" class="login-wrap">
+<div id="s-pin" class="login-wrap" style="display:none">
   <div class="pin-wrap">
     <div class="pin-header">
       <div class="pin-nombre" id="pin-nombre"></div>
@@ -370,13 +370,16 @@ async function iniciarApp() {
   mostrarLoading('Cargando operarios...');
   try {
     const res = await scriptCall({ action: 'getOperarios' });
+    console.log('Operarios recibidos:', res.operarios);
     renderOperarios(res.operarios);
   } catch(e) {
+    console.error('Error en iniciarApp:', e);
     ocultarLoading();
-    alert('Error conectando con el servidor. Revisá la conexión.');
+    alert('Error: ' + e.message);
     return;
   }
   ocultarLoading();
+  console.log('Mostrando pantalla de operarios');
   mostrarLogin('s-operarios');
 }
 
