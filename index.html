@@ -29,8 +29,7 @@
   .section-label:first-child { margin-top: 0; }
   .card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-border); padding: 14px 16px; margin-bottom: 10px; }
   .card-active { border: 2px solid var(--blue); }
-  .card-btn { cursor: pointer; }
-  .card-btn:active { opacity: 0.75; }
+  .card-btn { cursor: pointer; } .card-btn:active { opacity: 0.75; }
   .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; }
   .badge-blue { background: var(--blue-light); color: var(--blue-dark); }
   .badge-green { background: var(--green-light); color: var(--green-dark); }
@@ -44,15 +43,6 @@
   .btn-stop { background: var(--red); color: #fff; }
   .btn-blue { background: var(--blue); color: #fff; }
   .btn-md { width: 100%; padding: 13px; border-radius: var(--radius-sm); border: 1px solid var(--gray-border); background: var(--white); font-size: 15px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 10px; margin-bottom: 8px; color: var(--text); justify-content: center; }
-  .user-btn { width: 100%; padding: 16px; border-radius: var(--radius); border: 1px solid var(--gray-border); background: var(--white); font-size: 16px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 14px; margin-bottom: 10px; color: var(--text); }
-  .user-btn:active { background: var(--blue-light); border-color: var(--blue); }
-  .user-avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--blue-light); color: var(--blue); font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .etapa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .etapa-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-border); padding: 18px 10px; text-align: center; cursor: pointer; }
-  .etapa-card:active { border-color: var(--blue); background: var(--blue-light); transform: scale(0.97); }
-  .etapa-icon { font-size: 32px; margin-bottom: 8px; }
-  .etapa-nombre { font-size: 14px; font-weight: 600; }
-  .etapa-detalle { font-size: 11px; color: var(--gray-text); margin-top: 3px; }
   .info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
   .info-box { background: var(--gray-bg); border-radius: var(--radius-sm); padding: 12px 14px; }
   .info-label { font-size: 11px; color: var(--gray-text); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
@@ -63,9 +53,17 @@
   .crono-time.paused { color: var(--amber); }
   .crono-status { font-size: 13px; color: var(--gray-text); margin-top: 6px; }
   .crono-pausas { font-size: 12px; color: var(--amber); margin-top: 4px; font-weight: 500; }
+  .etapa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .etapa-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-border); padding: 18px 10px; text-align: center; cursor: pointer; position: relative; }
+  .etapa-card:active { border-color: var(--blue); background: var(--blue-light); transform: scale(0.97); }
+  .etapa-card.hecha { border-color: var(--green); }
+  .etapa-icon { font-size: 32px; margin-bottom: 8px; }
+  .etapa-nombre { font-size: 14px; font-weight: 600; }
+  .etapa-detalle { font-size: 11px; color: var(--gray-text); margin-top: 3px; }
+  .etapa-check { position: absolute; top: 8px; right: 8px; font-size: 16px; }
   .modulo-item { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-border); padding: 14px 16px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
   .modulo-item:active { border-color: var(--blue); background: var(--blue-light); }
-  .modulo-item.hecho { opacity: 0.45; cursor: not-allowed; }
+  .modulo-item.hecho { border-color: var(--green); }
   .modulo-nombre { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
   .modulo-detalle { font-size: 12px; color: var(--gray-text); }
   .plano-box { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-border); overflow: hidden; margin-bottom: 14px; min-height: 180px; display: flex; align-items: center; justify-content: center; }
@@ -87,10 +85,17 @@
   .btn-google { background: var(--blue); color: #fff; border: none; border-radius: var(--radius); padding: 16px 24px; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; justify-content: center; }
   .btn-google:active { opacity: 0.85; }
   .error-box { background: var(--red-light); color: var(--red-dark); border-radius: var(--radius-sm); padding: 14px; font-size: 13px; margin-top: 16px; display: none; text-align: center; line-height: 1.5; }
+  .acceso-denegado { background: var(--red-light); border-radius: var(--radius); padding: 24px; text-align: center; margin-top: 16px; display: none; }
+  .acceso-denegado .icon { font-size: 36px; margin-bottom: 8px; }
+  .acceso-denegado p { font-size: 14px; color: var(--red-dark); line-height: 1.5; }
   .sync-indicator { font-size: 11px; color: var(--gray-text); text-align: center; padding: 6px; }
   .trabajo-meta { display: flex; gap: 16px; margin-top: 10px; }
   .trabajo-meta-item .lbl { font-size: 11px; color: var(--gray-text); }
   .trabajo-meta-item .val { font-size: 14px; font-weight: 600; }
+  .operario-header { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-border); padding: 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 14px; }
+  .operario-avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--blue-light); color: var(--blue); font-size: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .operario-nombre { font-size: 17px; font-weight: 700; }
+  .operario-mail { font-size: 12px; color: var(--gray-text); margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -105,28 +110,24 @@
     Entrar con Google
   </button>
   <div class="error-box" id="login-error"></div>
-</div>
-
-<!-- OPERARIO -->
-<div id="s-operario" class="screen">
-  <div class="topbar">
-    <div><div class="topbar-title">🪚 Taller Control</div><div class="topbar-sub" id="op-fecha"></div></div>
-    <button class="btn-back" onclick="cerrarSesion()" style="color:var(--gray-text);font-size:13px">Salir</button>
-  </div>
-  <div class="content">
-    <div class="section-label">¿Quién sos?</div>
-    <div id="lista-operarios"></div>
-    <div class="sync-indicator" id="sync-op"></div>
+  <div class="acceso-denegado" id="acceso-denegado">
+    <div class="icon">🚫</div>
+    <p>Tu cuenta no tiene acceso a esta app.<br>Pedile al administrador que te agregue.</p>
+    <button class="btn-google" onclick="cerrarSesion()" style="margin-top:16px;background:var(--gray-text)">Intentar con otra cuenta</button>
   </div>
 </div>
 
 <!-- TRABAJO -->
 <div id="s-trabajo" class="screen">
   <div class="topbar">
-    <button class="btn-back" onclick="ir('s-operario')">← Volver</button>
-    <div style="text-align:right"><div class="topbar-title" id="t-operario-nombre"></div><div class="topbar-sub">Seleccionar trabajo</div></div>
+    <div><div class="topbar-title">🪚 Taller Control</div><div class="topbar-sub" id="op-fecha"></div></div>
+    <button class="btn-back" onclick="cerrarSesion()" style="color:var(--gray-text);font-size:13px">Salir</button>
   </div>
   <div class="content">
+    <div class="operario-header">
+      <div class="operario-avatar" id="op-avatar"></div>
+      <div><div class="operario-nombre" id="op-nombre"></div><div class="operario-mail" id="op-mail"></div></div>
+    </div>
     <div class="section-label">Trabajo activo</div>
     <div id="lista-trabajos-activos"></div>
     <div class="section-label">Próximos</div>
@@ -144,21 +145,25 @@
   <div class="content">
     <div class="section-label">¿Qué etapa vas a hacer?</div>
     <div class="etapa-grid">
-      <div class="etapa-card" onclick="irEtapaSimple('descarga')">
+      <div class="etapa-card" id="ec-descarga" onclick="irEtapaSimple('descarga')">
+        <div class="etapa-check" id="ck-descarga"></div>
         <div class="etapa-icon">🚛</div><div class="etapa-nombre">Descarga</div>
         <div class="etapa-detalle" id="e-piezas-descarga">— piezas</div>
       </div>
-      <div class="etapa-card" onclick="irEtapaSimple('corte')">
+      <div class="etapa-card" id="ec-corte" onclick="irEtapaSimple('corte')">
+        <div class="etapa-check" id="ck-corte"></div>
         <div class="etapa-icon">⚙️</div><div class="etapa-nombre">Corte / rebaje</div>
         <div class="etapa-detalle" id="e-piezas-corte">— piezas</div>
       </div>
-      <div class="etapa-card" onclick="irEtapaSimple('clasificacion')">
+      <div class="etapa-card" id="ec-clasificacion" onclick="irEtapaSimple('clasificacion')">
+        <div class="etapa-check" id="ck-clasificacion"></div>
         <div class="etapa-icon">📦</div><div class="etapa-nombre">Clasificación</div>
         <div class="etapa-detalle" id="e-mods-clasificacion">— módulos</div>
       </div>
       <div class="etapa-card" onclick="irModulos()">
+        <div class="etapa-check" id="ck-armado"></div>
         <div class="etapa-icon">🔧</div><div class="etapa-nombre">Armado</div>
-        <div class="etapa-detalle">Elegir módulo</div>
+        <div class="etapa-detalle" id="e-mods-armado">Elegir módulo</div>
       </div>
     </div>
   </div>
@@ -205,10 +210,9 @@
     <div style="text-align:right"><div class="topbar-title" id="a-modulo-nombre"></div><div class="topbar-sub" id="a-trabajo-nombre"></div></div>
   </div>
   <div class="content">
-    <div class="plano-box" id="a-plano-box">
+    <div class="plano-box">
       <div class="plano-placeholder" id="a-plano-placeholder">
-        <div class="icon">📐</div>
-        <p id="a-plano-txt">Sin plano cargado</p>
+        <div class="icon">📐</div><p id="a-plano-txt">Sin plano cargado</p>
       </div>
       <img id="a-plano-img" class="plano-img" style="display:none" alt="Plano del módulo">
     </div>
@@ -242,18 +246,19 @@
       <div class="stat-box"><div class="stat-num" id="r-operario"></div><div class="stat-lbl">Operario</div></div>
     </div>
     <button class="btn-xl btn-blue" onclick="ir('s-etapa')">+ Nueva etapa</button>
-    <button class="btn-md" onclick="ir('s-operario')">🏠 Inicio</button>
+    <button class="btn-md" onclick="ir('s-trabajo')">🏠 Mis trabajos</button>
   </div>
 </div>
 
 <script>
-const CLIENT_ID  = '220165516778-31l2lubvhdi78t43fk3sd59bmjb1opvc.apps.googleusercontent.com';
-const SHEET_ID   = '1GzE-KEZ-s_LxLqdgA8283tPy--yxWMY6MEksa6dgUFk';
-const SCOPES     = 'https://www.googleapis.com/auth/spreadsheets';
-const REDIRECT   = 'https://mnbudino-velez.github.io/taller-control/';
+const CLIENT_ID = '220165516778-31l2lubvhdi78t43fk3sd59bmjb1opvc.apps.googleusercontent.com';
+const SHEET_ID  = '1GzE-KEZ-s_LxLqdgA8283tPy--yxWMY6MEksa6dgUFk';
+const SCOPES    = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/userinfo.email';
+const REDIRECT  = 'https://mnbudino-velez.github.io/taller-control/';
 
 let token = null;
-let state = { operario: null, trabajo: null, etapa: null, moduloActual: null };
+let userEmail = null;
+let state = { operario: null, trabajo: null, etapa: null, moduloActual: null, etapasHechas: {} };
 let crono = { segundos: 0, pausas: 0, corriendo: false, pausado: false, interval: null };
 let datos = { operarios: [], trabajos: [], modulos: [] };
 
@@ -282,50 +287,60 @@ function iniciarLogin() {
 }
 
 function cerrarSesion() {
-  token = null;
+  token = null; userEmail = null;
   sessionStorage.removeItem('gtoken');
+  sessionStorage.removeItem('gemail');
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('acceso-denegado').style.display = 'none';
+  document.getElementById('login-error').style.display = 'none';
   document.getElementById('s-login').style.display = 'flex';
 }
 
-function checkAuth() {
-  // Leer token del hash (redirect OAuth)
+async function checkAuth() {
   if (window.location.hash) {
     const hash = new URLSearchParams(window.location.hash.replace('#', ''));
     const t = hash.get('access_token');
     const err = hash.get('error');
+    window.history.replaceState({}, '', window.location.pathname);
     if (t) {
       token = t;
-      sessionStorage.setItem('gtoken', token);
-      window.history.replaceState({}, '', window.location.pathname);
+      // Obtener email del usuario
+      try {
+        const r = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: 'Bearer ' + token }
+        });
+        const info = await r.json();
+        userEmail = info.email;
+        sessionStorage.setItem('gtoken', token);
+        sessionStorage.setItem('gemail', userEmail);
+      } catch(e) { mostrarErrorLogin('No se pudo obtener la información de tu cuenta.'); return; }
     } else if (err) {
-      mostrarError('Error de acceso: ' + err + '. Verificá que tu cuenta tenga permisos.');
-      return;
+      mostrarErrorLogin('Error: ' + err); return;
     }
   }
 
   if (!token) token = sessionStorage.getItem('gtoken');
+  if (!userEmail) userEmail = sessionStorage.getItem('gemail');
 
-  if (token) {
+  if (token && userEmail) {
     document.getElementById('s-login').style.display = 'none';
-    iniciarApp();
+    await iniciarApp();
   } else {
     document.getElementById('s-login').style.display = 'flex';
   }
 }
 
-function mostrarError(msg) {
+function mostrarErrorLogin(msg) {
   const el = document.getElementById('login-error');
-  el.textContent = msg;
-  el.style.display = 'block';
+  el.textContent = msg; el.style.display = 'block';
 }
 
+// ─── SHEETS API ───────────────────────────
 async function sheetsGet(range) {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(range)}`;
   const r = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
   if (r.status === 401) { cerrarSesion(); throw new Error('Token expirado'); }
-  const data = await r.json();
-  return data.values || [];
+  return (await r.json()).values || [];
 }
 
 async function sheetsAppend(range, values) {
@@ -348,56 +363,56 @@ async function sheetsUpdate(range, values) {
   });
 }
 
+// ─── CARGAR DATOS ─────────────────────────
 async function cargarDatos() {
-  try {
-    const [ops, trajs, mods] = await Promise.all([
-      sheetsGet('operarios!A2:C'),
-      sheetsGet('trabajos!A2:F'),
-      sheetsGet('modulos!A2:H')
-    ]);
-    datos.operarios = (ops || []).filter(r => r[2] === 'si').map(r => ({ id: r[0], nombre: r[1] }));
-    datos.trabajos  = (trajs || []).map(r => ({ id: r[0], cliente: r[1], modulos: r[2], piezas: r[3], fecha: r[4], estado: r[5] }));
-    datos.modulos   = (mods || []).map(r => ({ id: r[0], trabajo_id: r[1], nombre: r[2], medidas: r[3], piezas: r[4], complejidad: r[5], estado: r[6], url_plano: r[7] || '' }));
-  } catch(e) { console.error('Error cargando datos:', e); }
+  const [ops, trajs, mods, ses] = await Promise.all([
+    sheetsGet('operarios!A2:D'),   // +columna email
+    sheetsGet('trabajos!A2:F'),
+    sheetsGet('modulos!A2:H'),
+    sheetsGet('sesiones!A2:J')
+  ]);
+  datos.operarios = (ops||[]).map(r => ({ id:r[0], nombre:r[1], activo:r[2], email:(r[3]||'').toLowerCase().trim() }));
+  datos.trabajos  = (trajs||[]).map(r => ({ id:r[0], cliente:r[1], modulos:r[2], piezas:r[3], fecha:r[4], estado:r[5] }));
+  datos.modulos   = (mods||[]).map(r => ({ id:r[0], trabajo_id:r[1], nombre:r[2], medidas:r[3], piezas:r[4], complejidad:r[5], estado:r[6], url_plano:r[7]||'' }));
+  datos.sesiones  = (ses||[]).map(r => ({ trabajo_id:r[3], etapa:r[5] }));
 }
 
+// ─── INICIAR APP ──────────────────────────
 async function iniciarApp() {
-  document.getElementById('sync-op').textContent = 'Cargando...';
-  await cargarDatos();
-  renderOperarios();
-  ir('s-operario');
+  try {
+    await cargarDatos();
+  } catch(e) { mostrarErrorLogin('Error cargando datos. Intentá de nuevo.'); return; }
+
+  // Buscar operario por email
+  const emailNorm = (userEmail||'').toLowerCase().trim();
+  const operario = datos.operarios.find(o => o.email === emailNorm && o.activo === 'si');
+
+  if (!operario) {
+    document.getElementById('s-login').style.display = 'flex';
+    document.getElementById('acceso-denegado').style.display = 'block';
+    return;
+  }
+
+  state.operario = operario;
+  const iniciales = operario.nombre.split(' ').map(p=>p[0]).join('').substring(0,2).toUpperCase();
+  document.getElementById('op-avatar').textContent = iniciales;
+  document.getElementById('op-nombre').textContent = operario.nombre;
+  document.getElementById('op-mail').textContent = userEmail;
   document.getElementById('op-fecha').textContent = new Date().toLocaleDateString('es-AR', { weekday:'long', day:'numeric', month:'long' });
-}
 
-function renderOperarios() {
-  const cont = document.getElementById('lista-operarios');
-  cont.innerHTML = '';
-  datos.operarios.forEach(op => {
-    const iniciales = op.nombre.split(' ').map(p => p[0]).join('').substring(0,2).toUpperCase();
-    const btn = document.createElement('button');
-    btn.className = 'user-btn';
-    btn.innerHTML = `<div class="user-avatar">${iniciales}</div><span>${op.nombre}</span>`;
-    btn.onclick = () => elegirOperario(op);
-    cont.appendChild(btn);
-  });
-  document.getElementById('sync-op').textContent = datos.operarios.length + ' operarios cargados';
-}
-
-function elegirOperario(op) {
-  state.operario = op;
-  document.getElementById('t-operario-nombre').textContent = op.nombre;
   renderTrabajos();
   ir('s-trabajo');
 }
 
+// ─── TRABAJOS ─────────────────────────────
 function renderTrabajos() {
-  const activos   = datos.trabajos.filter(t => t.estado === 'en_curso');
+  const activos    = datos.trabajos.filter(t => t.estado === 'en_curso');
   const pendientes = datos.trabajos.filter(t => t.estado === 'pendiente');
-  const contA = document.getElementById('lista-trabajos-activos');
-  const contP = document.getElementById('lista-trabajos-pendientes');
-  contA.innerHTML = ''; contP.innerHTML = '';
-  activos.forEach(t => contA.appendChild(crearCardTrabajo(t, true)));
-  pendientes.forEach(t => contP.appendChild(crearCardTrabajo(t, false)));
+  const cA = document.getElementById('lista-trabajos-activos');
+  const cP = document.getElementById('lista-trabajos-pendientes');
+  cA.innerHTML = ''; cP.innerHTML = '';
+  activos.forEach(t => cA.appendChild(crearCardTrabajo(t, true)));
+  pendientes.forEach(t => cP.appendChild(crearCardTrabajo(t, false)));
   document.getElementById('sync-tr').textContent = activos.length + ' activo(s) · ' + pendientes.length + ' pendiente(s)';
 }
 
@@ -409,7 +424,7 @@ function crearCardTrabajo(t, activo) {
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
       <div><div style="font-size:12px;color:var(--gray-text);margin-bottom:2px">${t.id}</div>
       <div style="font-size:16px;font-weight:700">${t.cliente}</div></div>
-      <span class="badge ${activo ? 'badge-blue' : 'badge-gray'}">${activo ? 'En curso' : 'Pendiente'}</span>
+      <span class="badge ${activo?'badge-blue':'badge-gray'}">${activo?'En curso':'Pendiente'}</span>
     </div>
     <div class="trabajo-meta">
       <div class="trabajo-meta-item"><div class="lbl">Módulos</div><div class="val">${t.modulos}</div></div>
@@ -422,24 +437,61 @@ function crearCardTrabajo(t, activo) {
 
 function formatFecha(f) {
   if (!f) return '—';
-  try { return new Date(f + 'T00:00:00').toLocaleDateString('es-AR', { day:'numeric', month:'short' }); }
+  try { return new Date(f+'T00:00:00').toLocaleDateString('es-AR',{day:'numeric',month:'short'}); }
   catch(e) { return f; }
 }
 
 function elegirTrabajo(t) {
   state.trabajo = t;
+
+  // Calcular qué etapas ya tienen sesión registrada para este trabajo
+  state.etapasHechas = {};
+  datos.sesiones.filter(s => s.trabajo_id === t.id).forEach(s => {
+    state.etapasHechas[s.etapa] = true;
+  });
+
   document.getElementById('e-trabajo-nombre').textContent = t.cliente;
   document.getElementById('e-operario-nombre').textContent = state.operario.nombre;
   document.getElementById('e-piezas-descarga').textContent = t.piezas + ' piezas';
   document.getElementById('e-piezas-corte').textContent = t.piezas + ' piezas';
   document.getElementById('e-mods-clasificacion').textContent = t.modulos + ' módulos';
+
+  // Módulos armados
+  const modsHechos = datos.modulos.filter(m => m.trabajo_id === t.id && m.estado === 'terminado').length;
+  const modsTotal  = datos.modulos.filter(m => m.trabajo_id === t.id).length;
+  document.getElementById('e-mods-armado').textContent = modsHechos + '/' + modsTotal + ' módulos';
+
+  // Indicadores visuales de etapas hechas
+  ['descarga','corte','clasificacion'].forEach(e => {
+    const card = document.getElementById('ec-' + e);
+    const check = document.getElementById('ck-' + e);
+    if (state.etapasHechas[e]) {
+      card.classList.add('hecha');
+      check.textContent = '✅';
+    } else {
+      card.classList.remove('hecha');
+      check.textContent = '';
+    }
+  });
+
+  // Check armado
+  const ckArmado = document.getElementById('ck-armado');
+  if (modsHechos > 0 && modsHechos === modsTotal) {
+    ckArmado.textContent = '✅';
+  } else if (modsHechos > 0) {
+    ckArmado.textContent = '🔄';
+  } else {
+    ckArmado.textContent = '';
+  }
+
   ir('s-etapa');
 }
 
+// ─── ETAPAS SIMPLES ───────────────────────
 const ETAPA_INFO = {
-  descarga:      { nombre: 'Descarga', unidad: 'piezas', getCant: t => t.piezas },
-  corte:         { nombre: 'Corte / rebaje', unidad: 'piezas', getCant: t => t.piezas },
-  clasificacion: { nombre: 'Clasificación', unidad: 'módulos', getCant: t => t.modulos }
+  descarga:      { nombre:'Descarga',       unidad:'piezas',  getCant: t => t.piezas },
+  corte:         { nombre:'Corte / rebaje', unidad:'piezas',  getCant: t => t.piezas },
+  clasificacion: { nombre:'Clasificación',  unidad:'módulos', getCant: t => t.modulos }
 };
 
 function irEtapaSimple(etapa) {
@@ -452,21 +504,24 @@ function irEtapaSimple(etapa) {
   document.getElementById('c-unidad').textContent = info.unidad;
   document.getElementById('c-time').textContent = '00:00:00';
   document.getElementById('c-time').className = 'crono-time';
-  document.getElementById('c-status').textContent = 'Listo para iniciar';
+  document.getElementById('c-status').textContent = state.etapasHechas[etapa]
+    ? '⚠️ Esta etapa ya fue registrada — podés hacerla de nuevo si fue un error'
+    : 'Listo para iniciar';
   document.getElementById('c-pausas').style.display = 'none';
   document.getElementById('c-btn-play').style.display = 'flex';
-  document.getElementById('c-btn-play').textContent = '▶ Iniciar';
+  document.getElementById('c-btn-play').innerHTML = '▶ Iniciar';
   document.getElementById('c-btn-play').className = 'btn-xl btn-play';
   document.getElementById('c-btn-stop').style.display = 'none';
   ir('s-crono');
 }
 
+// ─── CRONÓMETRO ───────────────────────────
 function pad(n) { return String(n).padStart(2,'0'); }
 function fmt(s) { return pad(Math.floor(s/3600))+':'+pad(Math.floor((s%3600)/60))+':'+pad(s%60); }
 
 function resetCrono() {
   clearInterval(crono.interval);
-  crono = { segundos: 0, pausas: 0, corriendo: false, pausado: false, interval: null };
+  crono = { segundos:0, pausas:0, corriendo:false, pausado:false, interval:null };
 }
 
 function tickCrono(timeId) {
@@ -487,15 +542,13 @@ function accionCrono() {
     timeEl.className = 'crono-time running';
     statusEl.textContent = ETAPA_INFO[state.etapa].nombre + ' en progreso...';
     play.innerHTML = '⏸ Pausar'; play.className = 'btn-xl btn-pause';
-    stop.style.display = 'flex';
-    tickCrono('c-time');
+    stop.style.display = 'flex'; tickCrono('c-time');
   } else if (crono.corriendo) {
     crono.corriendo = false; crono.pausado = true; crono.pausas++;
     clearInterval(crono.interval);
-    timeEl.className = 'crono-time paused';
-    statusEl.textContent = 'En pausa';
+    timeEl.className = 'crono-time paused'; statusEl.textContent = 'En pausa';
     pausasEl.style.display = 'block';
-    pausasEl.textContent = crono.pausas + (crono.pausas === 1 ? ' pausa' : ' pausas');
+    pausasEl.textContent = crono.pausas + (crono.pausas===1?' pausa':' pausas');
     play.innerHTML = '▶ Continuar'; play.className = 'btn-xl btn-play';
   } else {
     crono.pausado = false; crono.corriendo = true;
@@ -513,17 +566,19 @@ async function guardarEtapa() {
   const horas = crono.segundos / 3600;
   const ritmo = horas > 0 ? Math.round(cant / horas) : 0;
   mostrarResumen(info.nombre, crono.segundos, crono.pausas, ritmo, info.unidad);
+  state.etapasHechas[state.etapa] = true;
+  datos.sesiones.push({ trabajo_id: state.trabajo.id, etapa: state.etapa });
   ir('s-resumen');
   try {
     await sheetsAppend('sesiones!A:J', [[
-      'S-' + Date.now(),
-      new Date().toISOString().split('T')[0],
+      'S-'+Date.now(), new Date().toISOString().split('T')[0],
       state.operario.id, state.trabajo.id, '',
       state.etapa, crono.segundos, crono.pausas, cant, info.unidad
     ]]);
   } catch(e) { console.error('Error guardando:', e); }
 }
 
+// ─── MÓDULOS ──────────────────────────────
 function irModulos() {
   document.getElementById('m-trabajo-nombre').textContent = state.trabajo.cliente;
   renderModulos();
@@ -534,13 +589,13 @@ function renderModulos() {
   const mods = datos.modulos.filter(m => m.trabajo_id === state.trabajo.id);
   const cont = document.getElementById('lista-modulos');
   cont.innerHTML = '';
-  if (mods.length === 0) {
+  if (!mods.length) {
     cont.innerHTML = '<div style="color:var(--gray-text);font-size:14px;text-align:center;padding:24px">No hay módulos cargados para este trabajo</div>';
     return;
   }
   mods.forEach(m => {
     const hecho = m.estado === 'terminado';
-    const compColor = { alta:'badge-red', media:'badge-amber', baja:'badge-green' }[m.complejidad] || 'badge-gray';
+    const compColor = {alta:'badge-red',media:'badge-amber',baja:'badge-green'}[m.complejidad]||'badge-gray';
     const div = document.createElement('div');
     div.className = 'modulo-item' + (hecho ? ' hecho' : '');
     div.innerHTML = `
@@ -549,14 +604,14 @@ function renderModulos() {
         <div class="modulo-detalle">${m.medidas} · ${m.piezas} piezas</div>
         <div style="margin-top:6px;display:flex;gap:6px">
           <span class="badge ${compColor}">${m.complejidad}</span>
-          ${hecho ? '<span class="badge badge-gray">✓ Terminado</span>' : ''}
+          ${hecho ? '<span class="badge badge-green">✓ Terminado</span>' : ''}
         </div>
       </div>
-      <div style="color:var(--gray-text);font-size:18px">${hecho ? '' : '›'}</div>`;
-    if (!hecho) div.onclick = () => abrirModulo(m);
+      <div style="color:var(--gray-text);font-size:20px">${hecho ? '✅' : '›'}</div>`;
+    div.onclick = () => abrirModulo(m);
     cont.appendChild(div);
   });
-  const hechos = mods.filter(m => m.estado === 'terminado').length;
+  const hechos = mods.filter(m => m.estado==='terminado').length;
   document.getElementById('sync-mod').textContent = hechos + ' de ' + mods.length + ' módulos terminados';
 }
 
@@ -569,7 +624,9 @@ function abrirModulo(m) {
   document.getElementById('a-complejidad').textContent = m.complejidad;
   document.getElementById('a-time').textContent = '00:00:00';
   document.getElementById('a-time').className = 'crono-time';
-  document.getElementById('a-status').textContent = 'Listo para iniciar';
+  document.getElementById('a-status').textContent = m.estado === 'terminado'
+    ? '⚠️ Este módulo ya fue marcado como terminado — podés rehacerlo si fue un error'
+    : 'Listo para iniciar';
   document.getElementById('a-pausas').style.display = 'none';
   document.getElementById('a-btn-play').style.display = 'flex';
   document.getElementById('a-btn-play').innerHTML = '▶ Iniciar armado';
@@ -597,23 +654,19 @@ function accionCronoArmado() {
   const pausasEl = document.getElementById('a-pausas');
   if (!crono.corriendo && !crono.pausado) {
     crono.corriendo = true;
-    timeEl.className = 'crono-time running';
-    statusEl.textContent = 'Armado en progreso...';
+    timeEl.className = 'crono-time running'; statusEl.textContent = 'Armado en progreso...';
     play.innerHTML = '⏸ Pausar'; play.className = 'btn-xl btn-pause';
-    stop.style.display = 'flex';
-    tickCrono('a-time');
+    stop.style.display = 'flex'; tickCrono('a-time');
   } else if (crono.corriendo) {
     crono.corriendo = false; crono.pausado = true; crono.pausas++;
     clearInterval(crono.interval);
-    timeEl.className = 'crono-time paused';
-    statusEl.textContent = 'En pausa';
+    timeEl.className = 'crono-time paused'; statusEl.textContent = 'En pausa';
     pausasEl.style.display = 'block';
-    pausasEl.textContent = crono.pausas + (crono.pausas === 1 ? ' pausa' : ' pausas');
+    pausasEl.textContent = crono.pausas + (crono.pausas===1?' pausa':' pausas');
     play.innerHTML = '▶ Continuar'; play.className = 'btn-xl btn-play';
   } else {
     crono.pausado = false; crono.corriendo = true;
-    timeEl.className = 'crono-time running';
-    statusEl.textContent = 'Armado en progreso...';
+    timeEl.className = 'crono-time running'; statusEl.textContent = 'Armado en progreso...';
     play.innerHTML = '⏸ Pausar'; play.className = 'btn-xl btn-pause';
     tickCrono('a-time');
   }
@@ -628,14 +681,13 @@ async function guardarArmado() {
   mostrarResumen(m.nombre, crono.segundos, crono.pausas, ritmo, 'piezas');
   ir('s-resumen');
   try {
-    const globalIdx = datos.modulos.findIndex(mod => mod.id === m.id && mod.trabajo_id === m.trabajo_id);
+    const globalIdx = datos.modulos.findIndex(mod => mod.id===m.id && mod.trabajo_id===m.trabajo_id);
     if (globalIdx >= 0) {
-      await sheetsUpdate(`modulos!G${globalIdx + 2}`, [['terminado']]);
+      await sheetsUpdate(`modulos!G${globalIdx+2}`, [['terminado']]);
       datos.modulos[globalIdx].estado = 'terminado';
     }
     await sheetsAppend('sesiones!A:J', [[
-      'S-' + Date.now(),
-      new Date().toISOString().split('T')[0],
+      'S-'+Date.now(), new Date().toISOString().split('T')[0],
       state.operario.id, state.trabajo.id, m.id,
       'armado', crono.segundos, crono.pausas, cant, 'piezas'
     ]]);
