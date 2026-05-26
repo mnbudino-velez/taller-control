@@ -281,7 +281,8 @@ function iniciarLogin() {
     redirect_uri: REDIRECT,
     response_type: 'token',
     scope: SCOPES,
-    prompt: 'select_account'
+    prompt: 'consent',
+    include_granted_scopes: 'true'
   });
   window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params;
 }
