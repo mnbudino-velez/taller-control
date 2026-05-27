@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taller Control — Admin</title>
+<style>
+  :root {
+    --blue: #185FA5; --blue-light: #E6F1FB; --blue-dark: #0C447C;
+    --green: #1D9E75; --green-light: #EAF3DE;
+    --amber: #BA7517; --amber-light: #FAEEDA;
+    --red: #A32D2D; --red-light: #FCEBEB;
+    --gray-bg: #F5F5F5; --gray-border: #E0E0E0; --gray-text: #666;
+    --text: #1A1A1A; --white: #FFFFFF; --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--gray-bg); color: var(--text); }
+  .header { background: var(--white); border-bottom: 1px solid var(--gray-border); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .header h1 { font-size: 18px; font-weight: 700; }
+  .header a { font-size: 13px; color: var(--blue); text-decoration: none; }
+  .container { max-width: 900px; margin: 0 auto; padding: 24px; }
+  .section-title { font-size: 12px; font-weight: 600; color: var(--gray-text); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; margin-top: 24px; }
+  .section-title:first-child { margin-top: 0; }
+  .card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-border); padding: 16px 20px; margin-bottom: 10px; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+  .badge-blue { background: var(--blue-light); color: var(--blue-dark); }
+  .badge-green { background: var(--green-light); color: #27500A; }
+  .badge-amber { background: var(--amber-light); color: #633806; }
+  .badge-gray { background: #EFEFEF; color: #555; }
+  .btn { padding: 10px 18px; border-radius: var(--radius); border: none; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+  .btn:active { opacity: 0.85; }
+  .btn-blue { background: var(--blue); color: #fff; }
+  .btn-green { background: var(--green); color: #fff; }
+  .btn-outline { background: var(--white); color: var(--text); border: 1px solid var(--gray-border); }
+  .btn-sm { padding: 6px 12px; font-size: 13px; }
+  .proyecto-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-border); padding: 16px 20px; margin-bottom: 10px; cursor: pointer; transition: border-color 0.15s; }
+  .proyecto-card:hover { border-color: var(--blue); }
+  .proyecto-card.selected { border: 2px solid var(--blue); background: var(--blue-light); }
+  .proyecto-nombre { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .proyecto-meta { display: flex; gap: 12px; flex-wrap: wrap; }
+  .ambiente-chip { font-size: 12px; background: var(--gray-bg); border: 1px solid var(--gray-border); border-radius: 20px; padding: 3px 10px; }
+  .ambiente-chip.con-despiece { border-color: var(--green); color: #27500A; }
+  .ambiente-chip.con-pdf { background: var(--blue-light); border-color: var(--blue); color: var(--blue-dark); }
+  .modulo-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--gray-bg); }
+  .modulo-row:last-child { border-bottom: none; }
+  .modulo-info { flex: 1; }
+  .modulo-nombre-row { font-size: 14px; font-weight: 600; }
+  .modulo-piezas { font-size: 12px; color: var(--gray-text); margin-top: 2px; }
+  .modulo-controls { display: flex; align-items: center; gap: 10px; }
+  input[type=text], input[type=number], select {
+    padding: 8px 12px; border-radius: 8px; border: 1px solid var(--gray-border);
+    font-size: 14px; background: var(--white); color: var(--text); width: 100%;
+  }
+  input[type=text]:focus, input[type=number]:focus, select:focus {
+    outline: none; border-color: var(--blue);
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .form-row.triple { grid-template-columns: 1fr 1fr 1fr; }
+  .form-label { font-size: 12px; color: var(--gray-text); margin-bottom: 4px; }
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .alert { padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; }
+  .alert-green { background: var(--green-light); color: #27500A; }
+  .alert-red { background: var(--red-light); color: #791F1F; }
+  .alert-amber { background: var(--amber-light); color: #633806; }
+  .empty { text-align: center; padding: 32px; color: var(--gray-text); font-size: 14px; }
+  .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 999; gap: 12px; }
+  .spinner-big { width: 36px; height: 36px; border: 3px solid var(--gray-border); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  .tab-bar { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 2px solid var(--gray-border); }
+  .tab { padding: 10px 18px; font-size: 14px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; color: var(--gray-text); }
+  .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .pdf-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--gray-bg); font-size: 13px; }
+  .pdf-item:last-child { border-bottom: none; }
+  select.comp-select { width: auto; padding: 4px 8px; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading" style="display:none">
+  <div class="spinner-big"></div>
+  <div id="loading-txt" style="font-size:14px;color:#666">Cargando...</div>
+</div>
+
+<div class="header">
+  <h1>🪚 Taller Control — Admin</h1>
+  <a href="index.html">← Volver a la app</a>
+</div>
+
+<div class="container">
+  <div class="tab-bar">
+    <div class="tab active" onclick="cambiarTab('proyectos')">Cargar proyecto</div>
+    <div class="tab" onclick="cambiarTab('trabajos')">Trabajos activos</div>
+  </div>
+
+  <!-- TAB: CARGAR PROYECTO -->
+  <div id="tab-proyectos" class="tab-content active">
+
+    <!-- PASO 1: Seleccionar proyecto -->
+    <div id="paso1">
+      <div class="section-title">Paso 1 — Seleccioná el proyecto de Drive</div>
+      <button class="btn btn-blue" onclick="cargarProyectos()" id="btn-cargar-proyectos">
+        🔄 Ver proyectos disponibles
+      </button>
+      <div id="lista-proyectos" style="margin-top:16px"></div>
+    </div>
+
+    <!-- PASO 2: Revisar despiece -->
+    <div id="paso2" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="section-title" style="margin:0">Paso 2 — Revisar despiece</div>
+        <button class="btn btn-outline btn-sm" onclick="volverPaso1()">← Volver</button>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div id="resumen-proyecto"></div>
+      </div>
+
+      <!-- Datos del trabajo -->
+      <div class="section-title">Datos del trabajo</div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="form-row">
+          <div><div class="form-label">ID del trabajo</div><input type="text" id="f-id" placeholder="ej: T-2025-001"></div>
+          <div><div class="form-label">Fecha de entrega</div><input type="date" id="f-fecha"></div>
+        </div>
+      </div>
+
+      <!-- Módulos detectados -->
+      <div class="section-title">Módulos detectados</div>
+      <div class="card">
+        <div id="lista-modulos-admin"></div>
+      </div>
+
+      <!-- PDFs disponibles -->
+      <div id="bloque-pdfs" style="display:none">
+        <div class="section-title">Planos disponibles (PDFs)</div>
+        <div class="card">
+          <div id="lista-pdfs"></div>
+        </div>
+      </div>
+
+      <div id="alert-paso2" style="margin-top:12px"></div>
+      <button class="btn btn-green" onclick="cargarEnSistema()" style="margin-top:16px;width:100%;padding:14px;font-size:16px" id="btn-cargar">
+        ✅ Cargar proyecto en el sistema
+      </button>
+    </div>
+
+  </div>
+
+  <!-- TAB: TRABAJOS ACTIVOS -->
+  <div id="tab-trabajos" class="tab-content">
+    <div class="section-title">Trabajos en el sistema</div>
+    <button class="btn btn-outline btn-sm" onclick="cargarTrabajos()" style="margin-bottom:16px">🔄 Actualizar</button>
+    <div id="lista-trabajos-activos"></div>
+  </div>
+
+</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwr4yIf1Nsg54m2pMlS1k7nBnHi7ebkB6AIDP5D0tUg-oXCkvynREFrrVBwt3P2wrFb/exec';
+
+let proyectoSeleccionado = null;
+let modulosDetectados    = [];
+let pdfsDisponibles      = [];
+let ambienteSeleccionado = null;
+
+// ─── UI ───────────────────────────────────
+function mostrarLoading(txt) {
+  document.getElementById('loading-txt').textContent = txt || 'Cargando...';
+  document.getElementById('loading').style.display = 'flex';
+}
+function ocultarLoading() { document.getElementById('loading').style.display = 'none'; }
+
+function cambiarTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['proyectos','trabajos'][i] === tab));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'trabajos') cargarTrabajos();
+}
+
+function mostrarAlert(id, msg, tipo) {
+  const el = document.getElementById(id);
+  el.innerHTML = `<div class="alert alert-${tipo}">${msg}</div>`;
+}
+
+// ─── SCRIPT CALL ──────────────────────────
+async function scriptCall(params) {
+  let url = SCRIPT_URL + '?';
+  for (const key in params) url += key + '=' + encodeURIComponent(params[key]) + '&';
+  const r = await fetch(url, { method: 'GET', redirect: 'follow' });
+  const data = await r.json();
+  if (!data.ok) throw new Error(data.error || 'Error');
+  return data;
+}
+
+// ─── PASO 1: PROYECTOS ────────────────────
+async function cargarProyectos() {
+  mostrarLoading('Leyendo proyectos de Drive...');
+  try {
+    const res = await scriptCall({ action: 'getProyectos' });
+    renderProyectos(res.proyectos);
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
+  ocultarLoading();
+}
+
+function renderProyectos(proyectos) {
+  const cont = document.getElementById('lista-proyectos');
+  if (!proyectos.length) { cont.innerHTML = '<div class="empty">No se encontraron proyectos con carpeta "planos constructivos"</div>'; return; }
+  cont.innerHTML = '<div class="section-title" style="margin-top:16px">Proyectos encontrados en Drive</div>';
+  proyectos.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'proyecto-card';
+    div.innerHTML = `
+      <div class="proyecto-nombre">${p.nombre}</div>
+      <div class="proyecto-meta" style="margin-bottom:8px">
+        <span class="badge badge-gray">${p.etapa}</span>
+      </div>
+      <div style="font-size:12px;color:#666;margin-bottom:8px">Ambientes:</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${p.ambientes.map(a => `
+          <div style="background:#f5f5f5;border:1px solid #e0e0e0;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px"
+               onclick="seleccionarAmbiente(event,'${p.nombre}','${a.carpetaId}','${a.nombre}')">
+            📁 ${a.nombre}
+            ${a.tieneDespiece ? '<span style="color:#27500A;margin-left:4px">✓ despiece</span>' : ''}
+            ${a.cantPDFs > 0 ? `<span style="color:#0C447C;margin-left:4px">${a.cantPDFs} PDF</span>` : ''}
+          </div>`).join('')}
+      </div>`;
+    cont.appendChild(div);
+  });
+}
+
+async function seleccionarAmbiente(event, proyectoNombre, carpetaId, ambienteNombre) {
+  mostrarLoading('Leyendo despiece...');
+  try {
+    const res = await scriptCall({ action: 'getDespiece', carpeta_id: carpetaId });
+    modulosDetectados    = res.modulos;
+    pdfsDisponibles      = res.pdfs;
+    ambienteSeleccionado = { proyectoNombre, carpetaId, ambienteNombre };
+    mostrarPaso2();
+  } catch(e) {
+    if (e.message === 'sin_despiece') {
+      alert('Este ambiente no tiene despiece todavía.');
+    } else {
+      alert('Error: ' + e.message);
+    }
+  }
+  ocultarLoading();
+}
+
+// ─── PASO 2: REVISAR DESPIECE ─────────────
+function mostrarPaso2() {
+  document.getElementById('paso1').style.display = 'none';
+  document.getElementById('paso2').style.display = 'block';
+
+  // Resumen
+  document.getElementById('resumen-proyecto').innerHTML = `
+    <div style="font-size:16px;font-weight:700;margin-bottom:4px">${ambienteSeleccionado.proyectoNombre}</div>
+    <div style="font-size:13px;color:#666">Ambiente: ${ambienteSeleccionado.ambienteNombre} · ${modulosDetectados.length} módulos detectados · ${modulosDetectados.reduce((s,m)=>s+m.piezas,0)} piezas totales</div>
+  `;
+
+  // ID sugerido
+  const fecha = new Date();
+  const anio  = fecha.getFullYear();
+  document.getElementById('f-id').value = 'T-' + anio + '-' + String(Math.floor(Math.random()*900)+100);
+
+  // Módulos
+  renderModulosAdmin();
+
+  // PDFs
+  if (pdfsDisponibles.length > 0) {
+    document.getElementById('bloque-pdfs').style.display = 'block';
+    const cont = document.getElementById('lista-pdfs');
+    cont.innerHTML = pdfsDisponibles.map(p => `
+      <div class="pdf-item">
+        <span>📄 ${p.nombre}</span>
+        <a href="${p.url}" target="_blank" style="font-size:12px;color:var(--blue)">Ver</a>
+      </div>`).join('');
+  }
+
+  document.getElementById('alert-paso2').innerHTML = '';
+}
+
+function renderModulosAdmin() {
+  const cont = document.getElementById('lista-modulos-admin');
+  if (!modulosDetectados.length) {
+    cont.innerHTML = '<div class="empty">No se detectaron módulos en el despiece</div>';
+    return;
+  }
+  cont.innerHTML = modulosDetectados.map((m, i) => `
+    <div class="modulo-row">
+      <div class="modulo-info">
+        <div class="modulo-nombre-row">
+          <input type="text" value="${m.nombre}" id="m-nombre-${i}"
+            style="font-weight:600;border:none;padding:0;font-size:14px;width:200px;background:transparent"
+            onfocus="this.style.background='#fff';this.style.border='1px solid #e0e0e0';this.style.padding='4px 8px'"
+            onblur="this.style.background='transparent';this.style.border='none';this.style.padding='0'">
+        </div>
+        <div class="modulo-piezas">
+          <input type="number" value="${m.piezas}" id="m-piezas-${i}" min="1"
+            style="width:60px;font-size:12px;padding:2px 6px;border-radius:4px"> piezas
+          · Proyecto: ${m.proyecto}
+        </div>
+      </div>
+      <div class="modulo-controls">
+        <select class="comp-select" id="m-comp-${i}">
+          <option value="baja">Baja</option>
+          <option value="media" selected>Media</option>
+          <option value="alta">Alta</option>
+        </select>
+        <button class="btn btn-outline btn-sm" onclick="eliminarModulo(${i})" style="color:#A32D2D;border-color:#A32D2D">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function eliminarModulo(i) {
+  modulosDetectados.splice(i, 1);
+  renderModulosAdmin();
+}
+
+function volverPaso1() {
+  document.getElementById('paso1').style.display = 'block';
+  document.getElementById('paso2').style.display = 'none';
+}
+
+// ─── CARGAR EN SISTEMA ────────────────────
+async function cargarEnSistema() {
+  const id    = document.getElementById('f-id').value.trim();
+  const fecha = document.getElementById('f-fecha').value;
+  if (!id) { mostrarAlert('alert-paso2', 'Ingresá un ID para el trabajo', 'amber'); return; }
+
+  // Leer módulos editados
+  const modulos = modulosDetectados.map((m, i) => ({
+    id:         id + '-M' + String(i+1).padStart(2,'0'),
+    trabajo_id: id,
+    nombre:     document.getElementById('m-nombre-'+i).value.trim(),
+    medidas:    '',
+    piezas:     parseInt(document.getElementById('m-piezas-'+i).value) || m.piezas,
+    complejidad: document.getElementById('m-comp-'+i).value,
+    estado:     'pendiente',
+    url_plano:  ''
+  }));
+
+  const piezasTotal = modulos.reduce((s,m) => s + m.piezas, 0);
+  const trabajo = {
+    id,
+    cliente:       ambienteSeleccionado.proyectoNombre + ' — ' + ambienteSeleccionado.ambienteNombre,
+    modulos_total: modulos.length,
+    piezas_total:  piezasTotal,
+    fecha_entrega: fecha,
+    estado:        'en_curso'
+  };
+
+  const btn = document.getElementById('btn-cargar');
+  btn.innerHTML = '<span class="spinner"></span> Cargando...';
+  btn.disabled = true;
+
+  try {
+    await scriptCall({ action: 'cargarProyecto', data: JSON.stringify({ trabajo, modulos }) });
+    mostrarAlert('alert-paso2', `✅ Proyecto "${id}" cargado con ${modulos.length} módulos y ${piezasTotal} piezas`, 'green');
+    btn.innerHTML = '✅ Cargado exitosamente';
+    setTimeout(() => { volverPaso1(); btn.innerHTML = '✅ Cargar proyecto en el sistema'; btn.disabled = false; }, 2000);
+  } catch(e) {
+    mostrarAlert('alert-paso2', 'Error: ' + e.message, 'red');
+    btn.innerHTML = '✅ Cargar proyecto en el sistema';
+    btn.disabled = false;
+  }
+}
+
+// ─── TAB TRABAJOS ─────────────────────────
+async function cargarTrabajos() {
+  const cont = document.getElementById('lista-trabajos-activos');
+  cont.innerHTML = '<div class="empty">Cargando...</div>';
+  try {
+    const res = await scriptCall({ action: 'login', operario_id: 'OP01', pin: '1234' });
+    const trabajos = res.trabajos || [];
+    if (!trabajos.length) { cont.innerHTML = '<div class="empty">No hay trabajos cargados</div>'; return; }
+    cont.innerHTML = trabajos.map(t => `
+      <div class="card" style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div style="font-size:12px;color:#666;margin-bottom:2px">${t.id}</div>
+            <div style="font-size:16px;font-weight:700">${t.cliente}</div>
+          </div>
+          <span class="badge ${t.estado==='en_curso'?'badge-blue':'badge-gray'}">${t.estado==='en_curso'?'En curso':'Pendiente'}</span>
+        </div>
+        <div style="display:flex;gap:16px;margin-top:10px;font-size:13px">
+          <span>📦 ${t.modulos} módulos</span>
+          <span>🔩 ${t.piezas} piezas</span>
+          <span>📅 ${t.fecha || '—'}</span>
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    cont.innerHTML = `<div class="empty">Error: ${e.message}</div>`;
+  }
+}
+</script>
+</body>
+</html>
