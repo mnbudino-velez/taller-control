@@ -238,7 +238,7 @@ async function seleccionarAmbiente(event, proyectoNombre, carpetaId, ambienteNom
     modulosDetectados    = res.modulos;
     pdfsDisponibles      = res.pdfs;
     ambienteSeleccionado = { proyectoNombre, carpetaId, ambienteNombre };
-    mostrarPaso2();
+    mostrarPaso2(res);
   } catch(e) {
     if (e.message === 'sin_despiece') {
       alert('Este ambiente no tiene despiece todavía.');
@@ -250,7 +250,7 @@ async function seleccionarAmbiente(event, proyectoNombre, carpetaId, ambienteNom
 }
 
 // ─── PASO 2: REVISAR DESPIECE ─────────────
-function mostrarPaso2() {
+function mostrarPaso2(res) {
   document.getElementById('paso1').style.display = 'none';
   document.getElementById('paso2').style.display = 'block';
 
@@ -260,10 +260,11 @@ function mostrarPaso2() {
     <div style="font-size:13px;color:#666">Ambiente: ${ambienteSeleccionado.ambienteNombre} · ${modulosDetectados.length} módulos detectados · ${modulosDetectados.reduce((s,m)=>s+m.piezas,0)} piezas totales</div>
   `;
 
-  // ID sugerido
-  const fecha = new Date();
-  const anio  = fecha.getFullYear();
-  document.getElementById('f-id').value = 'T-' + anio + '-' + String(Math.floor(Math.random()*900)+100);
+  // ID automático del despiece
+  const proyectoId = res ? res.proyectoId : null;
+  document.getElementById('f-id').value = proyectoId || '';
+  document.getElementById('f-id').readOnly = !!proyectoId;
+  if (proyectoId) document.getElementById('f-id').style.background = '#f5f5f5';
 
   // Módulos
   renderModulosAdmin();
