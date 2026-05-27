@@ -605,8 +605,8 @@ function renderModulos() {
     div.className = 'modulo-item'+(hecho?' hecho':'');
     div.innerHTML = `
       <div>
-        <div class="modulo-nombre">${m.id} — ${m.nombre}</div>
-        <div class="modulo-detalle">${m.medidas} · ${m.piezas} piezas</div>
+        <div class="modulo-nombre">Módulo ${m.nombre}</div>
+        <div class="modulo-detalle">${m.piezas} piezas</div>
         <div style="margin-top:6px;display:flex;gap:6px">
           <span class="badge ${compColor}">${m.complejidad}</span>
           ${hecho?'<span class="badge badge-green">✓ Terminado</span>':''}
@@ -669,6 +669,8 @@ function abrirModulo(m) {
     img.style.display='none'; ph.style.display='block'; 
     document.getElementById('a-plano-txt').textContent=m.nombre+(m.medidas?' · '+m.medidas:'');
   }
+  // Ocultar pantallas de login explícitamente
+  document.querySelectorAll('.login-wrap').forEach(s => s.style.display='none');
   ir('s-armado');
 }
 
