@@ -306,9 +306,9 @@ function renderModulosAdmin() {
       </div>
       <div class="modulo-controls">
         <select class="comp-select" id="m-comp-${i}">
-          <option value="baja">Baja</option>
-          <option value="media" selected>Media</option>
-          <option value="alta">Alta</option>
+          <option value="baja" ${m.complejidad==='baja'?'selected':''}>Baja</option>
+          <option value="media" ${m.complejidad==='media'?'selected':''}>Media</option>
+          <option value="alta" ${m.complejidad==='alta'?'selected':''}>Alta</option>
         </select>
         <button class="btn btn-outline btn-sm" onclick="eliminarModulo(${i})" style="color:#A32D2D;border-color:#A32D2D">✕</button>
       </div>
