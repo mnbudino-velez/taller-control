@@ -637,11 +637,38 @@ function abrirModulo(m) {
   document.getElementById('a-btn-play').className = 'btn-xl btn-play';
   document.getElementById('a-btn-stop').style.display = 'none';
   const img=document.getElementById('a-plano-img'), ph=document.getElementById('a-plano-placeholder');
+  const planoBox = document.getElementById('a-plano-box');
+  // Limpiar iframe previo si existe
+  const iframeViejo = planoBox.querySelector('iframe');
+  if (iframeViejo) iframeViejo.remove();
+  
   if (m.url_plano && m.url_plano.trim()) {
-    let url=m.url_plano; const match=url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-    if (match) url=`https://drive.google.com/uc?export=view&id=${match[1]}`;
-    img.src=url; img.style.display='block'; ph.style.display='none';
-  } else { img.style.display='none'; ph.style.display='block'; document.getElementById('a-plano-txt').textContent=m.nombre+' · '+m.medidas; }
+    const url = m.url_plano;
+    const matchDrive = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    const matchId    = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    const fileId     = matchDrive ? matchDrive[1] : matchId ? matchId[1] : null;
+    
+    if (fileId) {
+      // Detectar si es PDF o imagen por la URL
+      if (url.toLowerCase().includes('.pdf') || url.toLowerCase().includes('pdf')) {
+        // Mostrar PDF en iframe
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://drive.google.com/file/d/${fileId}/preview`;
+        iframe.style.cssText = 'width:100%;height:280px;border:none';
+        img.style.display='none'; ph.style.display='none';
+        planoBox.appendChild(iframe);
+      } else {
+        img.src=`https://drive.google.com/uc?export=view&id=${fileId}`;
+        img.style.display='block'; ph.style.display='none';
+      }
+    } else {
+      // URL directa
+      img.src=url; img.style.display='block'; ph.style.display='none';
+    }
+  } else { 
+    img.style.display='none'; ph.style.display='block'; 
+    document.getElementById('a-plano-txt').textContent=m.nombre+(m.medidas?' · '+m.medidas:'');
+  }
   ir('s-armado');
 }
 
