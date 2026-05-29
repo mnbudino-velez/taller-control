@@ -259,7 +259,7 @@
     <div style="text-align:right"><div class="topbar-title" id="a-modulo-nombre"></div><div class="topbar-sub" id="a-trabajo-nombre"></div></div>
   </div>
   <div class="content">
-    <div class="plano-box">
+    <div class="plano-box" id="a-plano-box">
       <div class="plano-placeholder" id="a-plano-placeholder">
         <div class="icon">📐</div><p id="a-plano-txt">Sin plano cargado</p>
       </div>
@@ -605,7 +605,7 @@ function renderModulos() {
     div.className = 'modulo-item'+(hecho?' hecho':'');
     div.innerHTML = `
       <div>
-        <div class="modulo-nombre">Módulo ${m.nombre}</div>
+        <div class="modulo-nombre">${m.nombre}</div>
         <div class="modulo-detalle">${m.piezas} piezas</div>
         <div style="margin-top:6px;display:flex;gap:6px">
           <span class="badge ${compColor}">${m.complejidad}</span>
