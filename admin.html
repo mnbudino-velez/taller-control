@@ -143,6 +143,11 @@
       <button class="btn btn-green" onclick="cargarEnSistema()" style="margin-top:16px;width:100%;padding:14px;font-size:16px" id="btn-cargar">
         ✅ Cargar proyecto en el sistema
       </button>
+      <div id="bloque-pdfs-btn" style="display:none;margin-top:10px">
+        <button class="btn btn-blue" onclick="procesarPDFs()" style="width:100%;padding:14px;font-size:16px" id="btn-pdfs">
+          📄 Asociar planos PDF a módulos
+        </button>
+      </div>
     </div>
 
   </div>
@@ -361,6 +366,10 @@ async function cargarEnSistema() {
     await scriptCall({ action: 'cargarProyecto', data: JSON.stringify({ trabajo, modulos }) });
     mostrarAlert('alert-paso2', `✅ Proyecto "${id}" cargado con ${modulos.length} módulos y ${piezasTotal} piezas`, 'green');
     btn.innerHTML = '✅ Cargado exitosamente';
+    // Mostrar botón de PDFs si hay PDFs disponibles
+    if (pdfsDisponibles.length > 0) {
+      document.getElementById('bloque-pdfs-btn').style.display = 'block';
+    }
     setTimeout(() => { volverPaso1(); btn.innerHTML = '✅ Cargar proyecto en el sistema'; btn.disabled = false; }, 2000);
   } catch(e) {
     mostrarAlert('alert-paso2', 'Error: ' + e.message, 'red');
@@ -369,7 +378,31 @@ async function cargarEnSistema() {
   }
 }
 
-// ─── TAB TRABAJOS ─────────────────────────
+// ─── PROCESAR PDFs ───────────────────────────
+async function procesarPDFs() {
+  const trabajoId = document.getElementById('f-id').value.trim();
+  if (!trabajoId) { mostrarAlert('alert-paso2', 'Primero cargá el proyecto', 'amber'); return; }
+
+  const btn = document.getElementById('btn-pdfs');
+  btn.innerHTML = '<span class="spinner" style="border-top-color:#fff;width:16px;height:16px;border-width:2px;display:inline-block;border-radius:50%;animation:spin 0.8s linear infinite;border-style:solid;border-color:rgba(255,255,255,0.4);border-top-color:#fff"></span> Procesando PDFs...';
+  btn.disabled = true;
+
+  try {
+    const res = await scriptCall({
+      action: 'procesarPDFs',
+      carpeta_id: ambienteSeleccionado.carpetaId,
+      trabajo_id: trabajoId
+    });
+    mostrarAlert('alert-paso2', `✅ ${res.actualizados} módulos asociados a sus planos`, 'green');
+    btn.innerHTML = '✅ Planos asociados';
+  } catch(e) {
+    mostrarAlert('alert-paso2', 'Error: ' + e.message, 'red');
+    btn.innerHTML = '📄 Asociar planos PDF a módulos';
+    btn.disabled = false;
+  }
+}
+
+// ─── TAB TRABAJOS ─────────────────────────────
 async function cargarTrabajos() {
   const cont = document.getElementById('lista-trabajos-activos');
   cont.innerHTML = '<div class="empty">Cargando...</div>';
