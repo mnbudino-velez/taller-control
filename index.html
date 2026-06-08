@@ -643,25 +643,12 @@ function abrirModulo(m) {
   if (iframeViejo) iframeViejo.remove();
   
   if (m.url_plano && m.url_plano.trim()) {
-    const url = m.url_plano;
-    // Extraer fileId y número de página de la URL
-    const matchId   = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-    const matchPage = url.match(/#page=(\d+)/);
-    const fileId    = matchId ? matchId[1] : null;
-    const page      = matchPage ? matchPage[1] : '1';
-
-    if (fileId) {
-      // Construir URL de preview con página específica
-      const iframeSrc = `https://drive.google.com/file/d/${fileId}/preview?page=${page}`;
-      const iframe = document.createElement('iframe');
-      iframe.src = iframeSrc;
-      iframe.style.cssText = 'width:100%;height:320px;border:none;border-radius:8px';
-      iframe.allow = 'autoplay';
-      img.style.display='none'; ph.style.display='none';
-      planoBox.appendChild(iframe);
-    } else {
-      img.src=url; img.style.display='block'; ph.style.display='none';
-    }
+    const iframe = document.createElement('iframe');
+    iframe.src = m.url_plano;
+    iframe.style.cssText = 'width:100%;height:320px;border:none;border-radius:8px';
+    iframe.allow = 'autoplay';
+    img.style.display='none'; ph.style.display='none';
+    planoBox.appendChild(iframe);
   } else { 
     img.style.display='none'; ph.style.display='block'; 
     document.getElementById('a-plano-txt').textContent=m.nombre+(m.medidas?' · '+m.medidas:'');
