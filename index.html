@@ -66,7 +66,7 @@
   .modulo-item.hecho { border-color: var(--green); }
   .modulo-nombre { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
   .modulo-detalle { font-size: 12px; color: var(--gray-text); }
-  .plano-box { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-border); overflow: hidden; margin-bottom: 14px; min-height: 180px; display: flex; align-items: center; justify-content: center; }
+  .plano-box { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-border); overflow: hidden; margin-bottom: 14px; min-height: 320px; display: flex; align-items: center; justify-content: center; }
   .plano-img { width: 100%; height: auto; max-height: 250px; object-fit: contain; }
   .plano-placeholder { text-align: center; padding: 24px; color: var(--gray-text); }
   .plano-placeholder .icon { font-size: 40px; margin-bottom: 8px; }
@@ -644,25 +644,22 @@ function abrirModulo(m) {
   
   if (m.url_plano && m.url_plano.trim()) {
     const url = m.url_plano;
-    const matchDrive = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-    const matchId    = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-    const fileId     = matchDrive ? matchDrive[1] : matchId ? matchId[1] : null;
-    
+    // Extraer fileId y número de página de la URL
+    const matchId   = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    const matchPage = url.match(/#page=(\d+)/);
+    const fileId    = matchId ? matchId[1] : null;
+    const page      = matchPage ? matchPage[1] : '1';
+
     if (fileId) {
-      // Detectar si es PDF o imagen por la URL
-      if (url.toLowerCase().includes('.pdf') || url.toLowerCase().includes('pdf')) {
-        // Mostrar PDF en iframe
-        const iframe = document.createElement('iframe');
-        iframe.src = `https://drive.google.com/file/d/${fileId}/preview`;
-        iframe.style.cssText = 'width:100%;height:280px;border:none';
-        img.style.display='none'; ph.style.display='none';
-        planoBox.appendChild(iframe);
-      } else {
-        img.src=`https://drive.google.com/uc?export=view&id=${fileId}`;
-        img.style.display='block'; ph.style.display='none';
-      }
+      // Construir URL de preview con página específica
+      const iframeSrc = `https://drive.google.com/file/d/${fileId}/preview?page=${page}`;
+      const iframe = document.createElement('iframe');
+      iframe.src = iframeSrc;
+      iframe.style.cssText = 'width:100%;height:320px;border:none;border-radius:8px';
+      iframe.allow = 'autoplay';
+      img.style.display='none'; ph.style.display='none';
+      planoBox.appendChild(iframe);
     } else {
-      // URL directa
       img.src=url; img.style.display='block'; ph.style.display='none';
     }
   } else { 
