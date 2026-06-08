@@ -153,6 +153,22 @@
     <div class="section-title">Trabajos en el sistema</div>
     <button class="btn btn-outline btn-sm" onclick="cargarTrabajos()" style="margin-bottom:16px">🔄 Actualizar</button>
     <div id="lista-trabajos-activos"></div>
+
+    <!-- Modal re-asociar planos -->
+    <div id="modal-planos" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center">
+      <div style="background:#fff;border-radius:12px;padding:24px;max-width:480px;width:90%;max-height:90vh;overflow-y:auto">
+        <div style="font-size:17px;font-weight:700;margin-bottom:4px" id="modal-trabajo-nombre"></div>
+        <div style="font-size:13px;color:#666;margin-bottom:16px" id="modal-trabajo-id"></div>
+        <div class="section-title">Carpeta de Drive</div>
+        <p style="font-size:13px;color:#666;margin-bottom:8px">Pegá el ID de la carpeta del ambiente (la que contiene los archivos 1.pdf, 2.pdf, etc.)</p>
+        <input type="text" id="modal-carpeta-id" placeholder="ID de carpeta de Drive" style="width:100%;padding:10px;border-radius:8px;border:1px solid #e0e0e0;font-size:14px;margin-bottom:12px">
+        <div id="modal-alert" style="margin-bottom:12px"></div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-blue" onclick="reAsociarPlanos()" style="flex:1" id="modal-btn">📄 Asociar planos</button>
+          <button class="btn btn-outline" onclick="cerrarModal()" style="flex:1">Cancelar</button>
+        </div>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -417,30 +433,78 @@ async function procesarPDFs() {
 }
 
 // ─── TAB TRABAJOS ─────────────────────────────
+let trabajosCargados = [];
+
 async function cargarTrabajos() {
   const cont = document.getElementById('lista-trabajos-activos');
   cont.innerHTML = '<div class="empty">Cargando...</div>';
   try {
     const res = await scriptCall({ action: 'login', operario_id: 'OP01', pin: '1234' });
-    const trabajos = res.trabajos || [];
-    if (!trabajos.length) { cont.innerHTML = '<div class="empty">No hay trabajos cargados</div>'; return; }
-    cont.innerHTML = trabajos.map(t => `
+    trabajosCargados = res.trabajos || [];
+    if (!trabajosCargados.length) { cont.innerHTML = '<div class="empty">No hay trabajos cargados</div>'; return; }
+    cont.innerHTML = trabajosCargados.map(t => `
       <div class="card" style="margin-bottom:10px">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
           <div>
             <div style="font-size:12px;color:#666;margin-bottom:2px">${t.id}</div>
             <div style="font-size:16px;font-weight:700">${t.cliente}</div>
           </div>
           <span class="badge ${t.estado==='en_curso'?'badge-blue':'badge-gray'}">${t.estado==='en_curso'?'En curso':'Pendiente'}</span>
         </div>
-        <div style="display:flex;gap:16px;margin-top:10px;font-size:13px">
+        <div style="display:flex;gap:16px;margin-bottom:10px;font-size:13px">
           <span>📦 ${t.modulos} módulos</span>
           <span>🔩 ${t.piezas} piezas</span>
           <span>📅 ${t.fecha || '—'}</span>
         </div>
+        <button class="btn btn-outline btn-sm" onclick="abrirModal('${t.id}','${t.cliente}')">
+          📄 Re-asociar planos
+        </button>
       </div>`).join('');
   } catch(e) {
     cont.innerHTML = `<div class="empty">Error: ${e.message}</div>`;
+  }
+}
+
+function abrirModal(trabajoId, trabajoNombre) {
+  document.getElementById('modal-trabajo-nombre').textContent = trabajoNombre;
+  document.getElementById('modal-trabajo-id').textContent = trabajoId;
+  document.getElementById('modal-carpeta-id').value = '';
+  document.getElementById('modal-alert').innerHTML = '';
+  document.getElementById('modal-btn').innerHTML = '📄 Asociar planos';
+  document.getElementById('modal-btn').disabled = false;
+  document.getElementById('modal-planos').style.display = 'flex';
+}
+
+function cerrarModal() {
+  document.getElementById('modal-planos').style.display = 'none';
+}
+
+async function reAsociarPlanos() {
+  const trabajoId  = document.getElementById('modal-trabajo-id').textContent;
+  const carpetaId  = document.getElementById('modal-carpeta-id').value.trim();
+  if (!carpetaId) {
+    document.getElementById('modal-alert').innerHTML = '<div class="alert alert-amber">Ingresá el ID de la carpeta</div>';
+    return;
+  }
+
+  const btn = document.getElementById('modal-btn');
+  btn.innerHTML = '⏳ Procesando...';
+  btn.disabled = true;
+
+  try {
+    const res = await scriptCall({
+      action: 'procesarPDFs',
+      carpeta_id: carpetaId,
+      trabajo_id: trabajoId
+    });
+    document.getElementById('modal-alert').innerHTML =
+      `<div class="alert alert-green">✅ ${res.actualizados} módulos actualizados con sus planos</div>`;
+    btn.innerHTML = '✅ Listo';
+  } catch(e) {
+    document.getElementById('modal-alert').innerHTML =
+      `<div class="alert alert-red">Error: ${e.message}</div>`;
+    btn.innerHTML = '📄 Asociar planos';
+    btn.disabled = false;
   }
 }
 </script>
