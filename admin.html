@@ -143,11 +143,7 @@
       <button class="btn btn-green" onclick="cargarEnSistema()" style="margin-top:16px;width:100%;padding:14px;font-size:16px" id="btn-cargar">
         ✅ Cargar proyecto en el sistema
       </button>
-      <div id="bloque-pdfs-btn" style="display:none;margin-top:10px">
-        <button class="btn btn-blue" onclick="procesarPDFs()" style="width:100%;padding:14px;font-size:16px" id="btn-pdfs">
-          📄 Asociar planos PDF a módulos
-        </button>
-      </div>
+
     </div>
 
   </div>
@@ -363,14 +359,32 @@ async function cargarEnSistema() {
   btn.disabled = true;
 
   try {
+    // Paso 1: cargar proyecto
     await scriptCall({ action: 'cargarProyecto', data: JSON.stringify({ trabajo, modulos }) });
-    mostrarAlert('alert-paso2', `✅ Proyecto "${id}" cargado con ${modulos.length} módulos y ${piezasTotal} piezas`, 'green');
-    btn.innerHTML = '✅ Cargado exitosamente';
-    // Mostrar botón de PDFs si hay PDFs disponibles
+    mostrarAlert('alert-paso2', `✅ Proyecto cargado. Asociando planos...`, 'green');
+
+    // Paso 2: si hay PDFs, asociar automáticamente
     if (pdfsDisponibles.length > 0) {
-      document.getElementById('bloque-pdfs-btn').style.display = 'block';
+      try {
+        const resPDF = await scriptCall({
+          action: 'procesarPDFs',
+          carpeta_id: ambienteSeleccionado.carpetaId,
+          trabajo_id: id
+        });
+        mostrarAlert('alert-paso2',
+          `✅ Proyecto "${id}" cargado — ${modulos.length} módulos · ${resPDF.actualizados} planos asociados automáticamente`,
+          'green');
+      } catch(ePDF) {
+        mostrarAlert('alert-paso2',
+          `✅ Proyecto cargado pero no se pudieron asociar los planos: ${ePDF.message}`,
+          'amber');
+      }
+    } else {
+      mostrarAlert('alert-paso2', `✅ Proyecto "${id}" cargado con ${modulos.length} módulos (sin PDFs por ahora)`, 'green');
     }
-    setTimeout(() => { volverPaso1(); btn.innerHTML = '✅ Cargar proyecto en el sistema'; btn.disabled = false; }, 2000);
+
+    btn.innerHTML = '✅ Cargado exitosamente';
+    setTimeout(() => { volverPaso1(); btn.innerHTML = '✅ Cargar proyecto en el sistema'; btn.disabled = false; }, 3000);
   } catch(e) {
     mostrarAlert('alert-paso2', 'Error: ' + e.message, 'red');
     btn.innerHTML = '✅ Cargar proyecto en el sistema';
