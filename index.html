@@ -119,6 +119,10 @@
   .trabajo-meta-item .val { font-size: 14px; font-weight: 600; }
   .sync-indicator { font-size: 11px; color: var(--gray-text); text-align: center; padding: 6px; }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+</script>
 </head>
 <body>
 
@@ -259,11 +263,25 @@
     <div style="text-align:right"><div class="topbar-title" id="a-modulo-nombre"></div><div class="topbar-sub" id="a-trabajo-nombre"></div></div>
   </div>
   <div class="content">
-    <div class="plano-box" id="a-plano-box">
-      <div class="plano-placeholder" id="a-plano-placeholder">
-        <div class="icon">📐</div><p id="a-plano-txt">Sin plano cargado</p>
+    <div id="a-plano-box" style="margin-bottom:14px">
+      <div id="a-plano-placeholder" style="background:var(--white);border-radius:var(--radius);border:1px solid var(--gray-border);min-height:180px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--gray-text);padding:24px;text-align:center">
+        <div style="font-size:40px">📐</div>
+        <p id="a-plano-txt">Sin plano cargado</p>
       </div>
-      <img id="a-plano-img" class="plano-img" style="display:none" alt="Plano del módulo">
+      <div id="a-plano-visor" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--white);border-radius:var(--radius) var(--radius) 0 0;border:1px solid var(--gray-border);border-bottom:none">
+          <span id="a-plano-titulo" style="font-size:13px;font-weight:600;color:var(--text)"></span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button onclick="zoomOut()" style="background:var(--gray-bg);border:1px solid var(--gray-border);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:16px">−</button>
+            <span id="zoom-label" style="font-size:12px;min-width:40px;text-align:center">100%</span>
+            <button onclick="zoomIn()" style="background:var(--gray-bg);border:1px solid var(--gray-border);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:16px">+</button>
+            <button onclick="abrirEnNuevaPestana()" style="background:var(--blue);color:#fff;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px">⛶ Abrir</button>
+          </div>
+        </div>
+        <div id="a-pdf-container" style="overflow:auto;max-height:400px;background:#525659;border-radius:0 0 var(--radius) var(--radius);border:1px solid var(--gray-border);border-top:none;display:flex;justify-content:center;padding:12px">
+          <canvas id="a-pdf-canvas" style="box-shadow:0 2px 8px rgba(0,0,0,0.3)"></canvas>
+        </div>
+      </div>
     </div>
     <div class="info-row">
       <div class="info-box"><div class="info-label">Piezas</div><div class="info-val" id="a-piezas">—</div></div>
@@ -636,22 +654,16 @@ function abrirModulo(m) {
   document.getElementById('a-btn-play').innerHTML = '▶ Iniciar armado';
   document.getElementById('a-btn-play').className = 'btn-xl btn-play';
   document.getElementById('a-btn-stop').style.display = 'none';
-  const img=document.getElementById('a-plano-img'), ph=document.getElementById('a-plano-placeholder');
-  const planoBox = document.getElementById('a-plano-box');
-  // Limpiar iframe previo si existe
-  const iframeViejo = planoBox.querySelector('iframe');
-  if (iframeViejo) iframeViejo.remove();
   
   if (m.url_plano && m.url_plano.trim()) {
-    const iframe = document.createElement('iframe');
-    iframe.src = m.url_plano;
-    iframe.style.cssText = 'width:100%;height:320px;border:none;border-radius:8px';
-    iframe.allow = 'autoplay';
-    img.style.display='none'; ph.style.display='none';
-    planoBox.appendChild(iframe);
-  } else { 
-    img.style.display='none'; ph.style.display='block'; 
-    document.getElementById('a-plano-txt').textContent=m.nombre+(m.medidas?' · '+m.medidas:'');
+    document.getElementById('a-plano-placeholder').style.display = 'none';
+    document.getElementById('a-plano-visor').style.display = 'block';
+    document.getElementById('a-plano-titulo').textContent = 'Módulo ' + m.nombre;
+    cargarPDF(m.url_plano);
+  } else {
+    document.getElementById('a-plano-placeholder').style.display = 'flex';
+    document.getElementById('a-plano-visor').style.display = 'none';
+    document.getElementById('a-plano-txt').textContent = m.nombre + (m.medidas ? ' · ' + m.medidas : '');
   }
   // Ocultar pantallas de login explícitamente
   document.querySelectorAll('.login-wrap').forEach(s => s.style.display='none');
@@ -701,6 +713,52 @@ function mostrarResumen(nombre, segs, pausas, ritmo, unidad) {
   document.getElementById('r-ritmo-lbl').textContent = unidad+'/hora';
   document.getElementById('r-operario').textContent = state.operario.nombre;
 }
+
+// ─── VISOR PDF ────────────────────────────────
+let pdfDoc = null, pdfZoom = 1.0, pdfUrlActual = null;
+
+async function cargarPDF(url) {
+  try {
+    // Convertir URL de preview de Drive a URL descargable
+    const fileIdMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (!fileIdMatch) return;
+    const fileId = fileIdMatch[1];
+    const pdfUrl = 'https://drive.google.com/uc?export=download&id=' + fileId;
+    pdfUrlActual = 'https://drive.google.com/file/d/' + fileId + '/view';
+
+    pdfZoom = 1.0;
+    document.getElementById('zoom-label').textContent = '100%';
+
+    const loadingTask = pdfjsLib.getDocument({
+      url: pdfUrl,
+      withCredentials: false
+    });
+    pdfDoc = await loadingTask.promise;
+    renderPagina(1);
+  } catch(e) {
+    console.error('Error cargando PDF:', e);
+    // Fallback: mostrar link para abrir externamente
+    document.getElementById('a-plano-visor').style.display = 'none';
+    document.getElementById('a-plano-placeholder').style.display = 'flex';
+    document.getElementById('a-plano-txt').innerHTML = '⚠️ No se pudo cargar el plano inline<br><a href="' + pdfUrlActual + '" target="_blank" style="color:var(--blue)">Abrir en Drive</a>';
+  }
+}
+
+async function renderPagina(num) {
+  if (!pdfDoc) return;
+  const page    = await pdfDoc.getPage(num);
+  const canvas  = document.getElementById('a-pdf-canvas');
+  const ctx     = canvas.getContext('2d');
+  const container = document.getElementById('a-pdf-container');
+  const viewport = page.getViewport({ scale: pdfZoom * (container.clientWidth - 24) / page.getViewport({ scale: 1 }).width });
+  canvas.width  = viewport.width;
+  canvas.height = viewport.height;
+  await page.render({ canvasContext: ctx, viewport }).promise;
+}
+
+function zoomIn()  { pdfZoom = Math.min(pdfZoom + 0.25, 3.0); document.getElementById('zoom-label').textContent = Math.round(pdfZoom*100)+'%'; renderPagina(1); }
+function zoomOut() { pdfZoom = Math.max(pdfZoom - 0.25, 0.5); document.getElementById('zoom-label').textContent = Math.round(pdfZoom*100)+'%'; renderPagina(1); }
+function abrirEnNuevaPestana() { if (pdfUrlActual) window.open(pdfUrlActual, '_blank'); }
 
 window.addEventListener('load', iniciarApp);
 </script>
