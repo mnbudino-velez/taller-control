@@ -6,6 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Taller Control</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
   :root {
     --blue: #185FA5; --blue-light: #E6F1FB; --blue-dark: #0C447C;
@@ -66,8 +67,6 @@
   .modulo-item.hecho { border-color: var(--green); }
   .modulo-nombre { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
   .modulo-detalle { font-size: 12px; color: var(--gray-text); }
-  .plano-box { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-border); overflow: hidden; margin-bottom: 14px; min-height: 320px; display: flex; align-items: center; justify-content: center; }
-  .plano-img { width: 100%; height: auto; max-height: 250px; object-fit: contain; }
   .plano-placeholder { text-align: center; padding: 24px; color: var(--gray-text); }
   .plano-placeholder .icon { font-size: 40px; margin-bottom: 8px; }
   .resumen-header { text-align: center; padding: 24px 16px 16px; }
@@ -82,20 +81,14 @@
   .spinner { width: 36px; height: 36px; border: 3px solid var(--gray-border); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
   .loading-txt { font-size: 14px; color: var(--gray-text); }
   @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* LOGIN PIN */
   .login-wrap { background: var(--white); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
   .login-logo { font-size: 52px; margin-bottom: 8px; }
   .login-title { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
   .login-sub { font-size: 13px; color: var(--gray-text); margin-bottom: 28px; }
-
-  /* Selección operario */
   .op-list { width: 100%; max-width: 360px; }
   .op-btn { width: 100%; padding: 16px 18px; border-radius: var(--radius); border: 1px solid var(--gray-border); background: var(--white); font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 14px; margin-bottom: 10px; color: var(--text); transition: all 0.15s; }
   .op-btn:active { background: var(--blue-light); border-color: var(--blue); }
   .op-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--blue-light); color: var(--blue); font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-
-  /* Teclado PIN */
   .pin-wrap { width: 100%; max-width: 320px; }
   .pin-header { text-align: center; margin-bottom: 20px; }
   .pin-nombre { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
@@ -109,7 +102,6 @@
   .pin-key:active { background: var(--blue-light); border-color: var(--blue); transform: scale(0.95); }
   .pin-key.borrar { font-size: 18px; color: var(--gray-text); }
   .pin-error { text-align: center; color: var(--red); font-size: 13px; font-weight: 500; margin-top: 14px; min-height: 20px; }
-
   .operario-header { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-border); padding: 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 14px; }
   .operario-avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--blue-light); color: var(--blue); font-size: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .operario-nombre { font-size: 17px; font-weight: 700; }
@@ -118,6 +110,13 @@
   .trabajo-meta-item .lbl { font-size: 11px; color: var(--gray-text); }
   .trabajo-meta-item .val { font-size: 14px; font-weight: 600; }
   .sync-indicator { font-size: 11px; color: var(--gray-text); text-align: center; padding: 6px; }
+  /* VISOR PDF */
+  #pdf-canvas-wrap { flex:1; overflow:auto; background:#525659; display:flex; align-items:flex-start; justify-content:center; -webkit-overflow-scrolling:touch; touch-action: pinch-zoom; }
+  #pdf-canvas { display:block; margin:auto; box-shadow:0 2px 12px rgba(0,0,0,0.4); }
+  .pdf-toolbar { display:flex; align-items:center; justify-content:center; gap:8px; padding:10px; background:#1a1a1a; flex-shrink:0; }
+  .pdf-zoom-btn { background:#333; color:#fff; border:none; border-radius:8px; width:44px; height:44px; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .pdf-zoom-btn:active { background:#555; }
+  .pdf-zoom-label { color:#fff; font-size:14px; min-width:54px; text-align:center; }
 </style>
 </head>
 <body>
@@ -260,8 +259,8 @@
   </div>
   <div class="content">
     <div id="a-plano-box" style="margin-bottom:14px">
-      <div id="a-plano-placeholder" style="background:var(--white);border-radius:var(--radius);border:1px solid var(--gray-border);min-height:180px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--gray-text);padding:24px;text-align:center">
-        <div style="font-size:40px">📐</div>
+      <div id="a-plano-placeholder" style="background:var(--white);border-radius:var(--radius);border:1px solid var(--gray-border);min-height:120px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--gray-text);padding:20px;text-align:center">
+        <div style="font-size:36px">📐</div>
         <p id="a-plano-txt">Sin plano cargado</p>
       </div>
       <div id="a-plano-visor" style="display:none">
@@ -304,16 +303,24 @@
   </div>
 </div>
 
-<!-- MODAL PLANO -->
+<!-- MODAL PLANO PDF.js -->
 <div id="modal-plano" style="display:none;position:fixed;inset:0;background:#000;z-index:9999;flex-direction:column">
   <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#1a1a1a;flex-shrink:0">
     <span id="modal-plano-titulo" style="color:#fff;font-size:15px;font-weight:600"></span>
     <button onclick="cerrarModalPlano()" style="background:#333;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer">✕ Cerrar</button>
   </div>
-  <iframe id="modal-plano-iframe" style="flex:1;width:100%;border:none" allow="autoplay"></iframe>
+  <div id="pdf-canvas-wrap">
+    <canvas id="pdf-canvas"></canvas>
+  </div>
+  <div class="pdf-toolbar">
+    <button class="pdf-zoom-btn" onclick="pdfZoomOut()">−</button>
+    <span class="pdf-zoom-label" id="pdf-zoom-label">100%</span>
+    <button class="pdf-zoom-btn" onclick="pdfZoomIn()">+</button>
+  </div>
 </div>
 
 <script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwr4yIf1Nsg54m2pMlS1k7nBnHi7ebkB6AIDP5D0tUg-oXCkvynREFrrVBwt3P2wrFb/exec';
 
 let state = { operario: null, trabajo: null, etapa: null, moduloActual: null, etapasHechas: {} };
@@ -322,9 +329,7 @@ let datos = { trabajos: [], modulos: [], sesiones: [] };
 let pinActual = '';
 let opSeleccionado = null;
 
-// ─── UI ───────────────────────────────────
 function ir(id) {
-  // Ocultar todo
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.login-wrap').forEach(s => s.style.display='none');
   const el = document.getElementById(id);
@@ -357,33 +362,24 @@ function cerrarSesion() {
   mostrarLogin('s-operarios');
 }
 
-// ─── APPS SCRIPT ─────────────────────────────
 async function scriptCall(params) {
   let url = SCRIPT_URL + '?';
-  for (const key in params) {
-    url += key + '=' + encodeURIComponent(params[key]) + '&';
-  }
+  for (const key in params) url += key + '=' + encodeURIComponent(params[key]) + '&';
   const r = await fetch(url, { method: 'GET', redirect: 'follow' });
   const data = await r.json();
   if (!data.ok) throw new Error(data.error || 'Error');
   return data;
 }
 
-// ─── INICIO ───────────────────────────────
 async function iniciarApp() {
   mostrarLoading('Cargando operarios...');
   try {
     const res = await scriptCall({ action: 'getOperarios' });
-    console.log('Operarios recibidos:', res.operarios);
     renderOperarios(res.operarios);
   } catch(e) {
-    console.error('Error en iniciarApp:', e);
-    ocultarLoading();
-    alert('Error: ' + e.message);
-    return;
+    ocultarLoading(); alert('Error: ' + e.message); return;
   }
   ocultarLoading();
-  console.log('Mostrando pantalla de operarios');
   mostrarLogin('s-operarios');
 }
 
@@ -400,10 +396,8 @@ function renderOperarios(operarios) {
   });
 }
 
-// ─── PIN ──────────────────────────────────
 function elegirOperario(op) {
-  opSeleccionado = op;
-  pinActual = '';
+  opSeleccionado = op; pinActual = '';
   document.getElementById('pin-nombre').textContent = op.nombre;
   document.getElementById('pin-error').textContent = '';
   actualizarDots();
@@ -412,27 +406,14 @@ function elegirOperario(op) {
 
 function pinTecla(n) {
   if (pinActual.length >= 4) return;
-  pinActual += n;
-  actualizarDots();
+  pinActual += n; actualizarDots();
   if (pinActual.length === 4) verificarPin();
 }
-
-function pinBorrar() {
-  pinActual = pinActual.slice(0, -1);
-  document.getElementById('pin-error').textContent = '';
-  actualizarDots();
-}
-
-function pinVolver() {
-  pinActual = '';
-  actualizarDots();
-  mostrarLogin('s-operarios');
-}
-
+function pinBorrar() { pinActual = pinActual.slice(0, -1); document.getElementById('pin-error').textContent = ''; actualizarDots(); }
+function pinVolver() { pinActual = ''; actualizarDots(); mostrarLogin('s-operarios'); }
 function actualizarDots() {
   for (let i = 0; i < 4; i++) {
-    const d = document.getElementById('d' + i);
-    d.className = 'pin-dot' + (i < pinActual.length ? ' filled' : '');
+    document.getElementById('d'+i).className = 'pin-dot' + (i < pinActual.length ? ' filled' : '');
   }
 }
 
@@ -441,17 +422,11 @@ async function verificarPin() {
   try {
     const res = await scriptCall({ action: 'login', operario_id: opSeleccionado.id, pin: pinActual });
     state.operario = res.operario;
-    datos.trabajos  = res.trabajos  || [];
-    datos.modulos   = res.modulos   || [];
-    datos.sesiones  = res.sesiones  || [];
-    ocultarLoading();
-    entrarAlTaller();
+    datos.trabajos = res.trabajos || []; datos.modulos = res.modulos || []; datos.sesiones = res.sesiones || [];
+    ocultarLoading(); entrarAlTaller();
   } catch(e) {
-    ocultarLoading();
-    pinActual = '';
-    actualizarDots();
+    ocultarLoading(); pinActual = ''; actualizarDots();
     if (e.message === 'pin_incorrecto') {
-      // Animación error
       for (let i = 0; i < 4; i++) document.getElementById('d'+i).className = 'pin-dot error';
       document.getElementById('pin-error').textContent = 'PIN incorrecto, intentá de nuevo';
       setTimeout(() => { actualizarDots(); }, 800);
@@ -471,9 +446,8 @@ function entrarAlTaller() {
   ir('s-trabajo');
 }
 
-// ─── TRABAJOS ─────────────────────────────
 function renderTrabajos() {
-  const activos    = datos.trabajos.filter(t => t.estado === 'en_curso');
+  const activos = datos.trabajos.filter(t => t.estado === 'en_curso');
   const pendientes = datos.trabajos.filter(t => t.estado === 'pendiente');
   document.getElementById('lista-trabajos-activos').innerHTML = '';
   document.getElementById('lista-trabajos-pendientes').innerHTML = '';
@@ -508,8 +482,7 @@ function formatFecha(f) {
 }
 
 function elegirTrabajo(t) {
-  state.trabajo = t;
-  state.etapasHechas = {};
+  state.trabajo = t; state.etapasHechas = {};
   datos.sesiones.filter(s => s.trabajo_id === t.id).forEach(s => { state.etapasHechas[s.etapa] = true; });
   document.getElementById('e-trabajo-nombre').textContent = t.cliente;
   document.getElementById('e-operario-nombre').textContent = state.operario.nombre;
@@ -520,8 +493,7 @@ function elegirTrabajo(t) {
   const modsH = modsT.filter(m => m.estado === 'terminado').length;
   document.getElementById('e-mods-armado').textContent = modsH + '/' + modsT.length + ' módulos';
   ['descarga','corte','clasificacion'].forEach(e => {
-    const card = document.getElementById('ec-' + e);
-    const check = document.getElementById('ck-' + e);
+    const card = document.getElementById('ec-' + e), check = document.getElementById('ck-' + e);
     if (state.etapasHechas[e]) { card.classList.add('hecha'); check.textContent = '✅'; }
     else { card.classList.remove('hecha'); check.textContent = ''; }
   });
@@ -530,7 +502,6 @@ function elegirTrabajo(t) {
   ir('s-etapa');
 }
 
-// ─── ETAPAS ───────────────────────────────
 const ETAPA_INFO = {
   descarga:      { nombre:'Descarga',       unidad:'piezas',  getCant: t => t.piezas },
   corte:         { nombre:'Corte / rebaje', unidad:'piezas',  getCant: t => t.piezas },
@@ -548,8 +519,7 @@ function irEtapaSimple(etapa) {
   document.getElementById('c-time').textContent = '00:00:00';
   document.getElementById('c-time').className = 'crono-time';
   document.getElementById('c-status').textContent = state.etapasHechas[etapa]
-    ? '⚠️ Esta etapa ya fue registrada — podés rehacerla si fue un error'
-    : 'Listo para iniciar';
+    ? '⚠️ Esta etapa ya fue registrada — podés rehacerla si fue un error' : 'Listo para iniciar';
   document.getElementById('c-pausas').style.display = 'none';
   document.getElementById('c-btn-play').style.display = 'flex';
   document.getElementById('c-btn-play').innerHTML = '▶ Iniciar';
@@ -558,7 +528,6 @@ function irEtapaSimple(etapa) {
   ir('s-crono');
 }
 
-// ─── CRONÓMETRO ───────────────────────────
 function pad(n) { return String(n).padStart(2,'0'); }
 function fmt(s) { return pad(Math.floor(s/3600))+':'+pad(Math.floor((s%3600)/60))+':'+pad(s%60); }
 function resetCrono() { clearInterval(crono.interval); crono = { segundos:0, pausas:0, corriendo:false, pausado:false, interval:null }; }
@@ -601,7 +570,6 @@ async function guardarEtapa() {
   } catch(e) { console.error('Error guardando:', e); }
 }
 
-// ─── MÓDULOS ──────────────────────────────
 function irModulos() {
   document.getElementById('m-trabajo-nombre').textContent = state.trabajo.cliente;
   renderModulos(); ir('s-modulos');
@@ -619,7 +587,7 @@ function renderModulos() {
     div.className = 'modulo-item'+(hecho?' hecho':'');
     div.innerHTML = `
       <div>
-        <div class="modulo-nombre">${m.nombre}</div>
+        <div class="modulo-nombre">Módulo ${m.nombre}</div>
         <div class="modulo-detalle">${m.piezas} piezas</div>
         <div style="margin-top:6px;display:flex;gap:6px">
           <span class="badge ${compColor}">${m.complejidad}</span>
@@ -636,32 +604,32 @@ function renderModulos() {
 
 function abrirModulo(m) {
   state.moduloActual = m; resetCrono();
-  document.getElementById('a-modulo-nombre').textContent = m.nombre;
+  document.getElementById('a-modulo-nombre').textContent = 'Módulo ' + m.nombre;
   document.getElementById('a-trabajo-nombre').textContent = state.trabajo.cliente+' · '+state.operario.nombre;
   document.getElementById('a-piezas').textContent = m.piezas;
   document.getElementById('a-complejidad').textContent = m.complejidad;
   document.getElementById('a-time').textContent = '00:00:00';
   document.getElementById('a-time').className = 'crono-time';
   document.getElementById('a-status').textContent = m.estado==='terminado'
-    ? '⚠️ Este módulo ya fue marcado como terminado — podés rehacerlo si fue un error'
-    : 'Listo para iniciar';
+    ? '⚠️ Este módulo ya fue marcado como terminado — podés rehacerlo si fue un error' : 'Listo para iniciar';
   document.getElementById('a-pausas').style.display = 'none';
   document.getElementById('a-btn-play').style.display = 'flex';
   document.getElementById('a-btn-play').innerHTML = '▶ Iniciar armado';
   document.getElementById('a-btn-play').className = 'btn-xl btn-play';
   document.getElementById('a-btn-stop').style.display = 'none';
-  
-  if (m.url_plano && m.url_plano.trim()) {
+
+  // Plano: url_plano ahora es "carpetaId|modulo"
+  if (m.url_plano && m.url_plano.trim() && m.url_plano.includes('|')) {
     document.getElementById('a-plano-placeholder').style.display = 'none';
     document.getElementById('a-plano-visor').style.display = 'block';
     document.getElementById('a-plano-titulo').textContent = 'Módulo ' + m.nombre;
-    cargarPDF(m.url_plano);
+    planoActual = m.url_plano; // guardamos para cargar al abrir modal
   } else {
     document.getElementById('a-plano-placeholder').style.display = 'flex';
     document.getElementById('a-plano-visor').style.display = 'none';
-    document.getElementById('a-plano-txt').textContent = m.nombre + (m.medidas ? ' · ' + m.medidas : '');
+    document.getElementById('a-plano-txt').textContent = 'Sin plano cargado';
+    planoActual = null;
   }
-  // Ocultar pantallas de login explícitamente
   document.querySelectorAll('.login-wrap').forEach(s => s.style.display='none');
   ir('s-armado');
 }
@@ -687,7 +655,7 @@ async function guardarArmado() {
   clearInterval(crono.interval);
   const m=state.moduloActual, cant=parseInt(m.piezas)||0;
   const ritmo=crono.segundos>0?Math.round(cant/(crono.segundos/3600)):0;
-  mostrarResumen(m.nombre, crono.segundos, crono.pausas, ritmo, 'piezas');
+  mostrarResumen('Módulo '+m.nombre, crono.segundos, crono.pausas, ritmo, 'piezas');
   ir('s-resumen');
   try {
     await scriptCall({ action:'marcarModulo', operario_id:state.operario.id, data:JSON.stringify({modulo_id:m.id,trabajo_id:m.trabajo_id}) });
@@ -710,31 +678,65 @@ function mostrarResumen(nombre, segs, pausas, ritmo, unidad) {
   document.getElementById('r-operario').textContent = state.operario.nombre;
 }
 
-// ─── VISOR PDF ────────────────────────────────
-let pdfUrlActual = null;
+// ─── VISOR PDF.js CON PROXY ───────────────────
+let planoActual = null;      // "carpetaId|modulo"
+let pdfDoc = null;
+let pdfScale = 1.0;
+let pdfBaseScale = 1.0;
 
-function cargarPDF(url) {
-  const fileIdMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  if (!fileIdMatch) return;
-  const fileId = fileIdMatch[1];
-  pdfUrlActual = 'https://drive.google.com/file/d/' + fileId + '/preview';
-}
-
-function abrirModalPlano() {
-  if (!pdfUrlActual) return;
+async function abrirModalPlano() {
+  if (!planoActual) return;
+  const [carpetaId, modulo] = planoActual.split('|');
   const modal = document.getElementById('modal-plano');
-  const titulo = document.getElementById('a-plano-titulo').textContent;
-  document.getElementById('modal-plano-titulo').textContent = titulo;
-  document.getElementById('modal-plano-iframe').src = pdfUrlActual;
+  document.getElementById('modal-plano-titulo').textContent = 'Módulo ' + modulo;
   modal.style.display = 'flex';
-  // Prevenir scroll del body
   document.body.style.overflow = 'hidden';
+
+  mostrarLoading('Cargando plano...');
+  try {
+    const res = await scriptCall({ action:'getPDF', carpeta_id: carpetaId, modulo: modulo });
+    // Convertir base64 a Uint8Array
+    const raw = atob(res.base64);
+    const bytes = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+
+    pdfDoc = await pdfjsLib.getDocument({ data: bytes }).promise;
+    pdfScale = 1.0;
+    await renderPlano();
+    ocultarLoading();
+  } catch(e) {
+    ocultarLoading();
+    console.error('Error cargando PDF:', e);
+    alert('No se pudo cargar el plano: ' + e.message);
+    cerrarModalPlano();
+  }
 }
+
+async function renderPlano() {
+  if (!pdfDoc) return;
+  const page = await pdfDoc.getPage(1);
+  const canvas = document.getElementById('pdf-canvas');
+  const ctx = canvas.getContext('2d');
+  const wrap = document.getElementById('pdf-canvas-wrap');
+
+  // Calcular escala base para que entre en el ancho
+  const baseViewport = page.getViewport({ scale: 1 });
+  pdfBaseScale = (wrap.clientWidth - 24) / baseViewport.width;
+
+  const viewport = page.getViewport({ scale: pdfBaseScale * pdfScale });
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+  await page.render({ canvasContext: ctx, viewport }).promise;
+  document.getElementById('pdf-zoom-label').textContent = Math.round(pdfScale * 100) + '%';
+}
+
+function pdfZoomIn()  { pdfScale = Math.min(pdfScale + 0.5, 6); renderPlano(); }
+function pdfZoomOut() { pdfScale = Math.max(pdfScale - 0.5, 1); renderPlano(); }
 
 function cerrarModalPlano() {
   document.getElementById('modal-plano').style.display = 'none';
-  document.getElementById('modal-plano-iframe').src = '';
   document.body.style.overflow = '';
+  pdfDoc = null;
 }
 
 window.addEventListener('load', iniciarApp);
