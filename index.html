@@ -764,15 +764,8 @@ function initGestosPlano() {
 
   function getRect() { return zona.getBoundingClientRect(); }
 
-  zona.addEventListener('pointerdown', e => {
-    punteros.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (punteros.size === 2) {
-      const p = [...punteros.values()];
-      prevDist = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
-      const r = getRect();
-      prevMid = { x: (p[0].x + p[1].x)/2 - r.left, y: (p[0].y + p[1].y)/2 - r.top };
-    }
-  });
+  let modoActual = null; // 'pan' | 'pinch' | null
+  let panPoint = null;
 
   zona.addEventListener('pointermove', e => {
     if (!punteros.has(e.pointerId)) return;
@@ -780,15 +773,14 @@ function initGestosPlano() {
     const p = [...punteros.values()];
     const r = getRect();
 
-    if (p.length === 2) {
+    if (p.length >= 2) {
+      modoActual = 'pinch';
       const dist = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
       const mid = { x: (p[0].x + p[1].x)/2 - r.left, y: (p[0].y + p[1].y)/2 - r.top };
-      if (prevDist > 0) {
-        // Zoom incremental respecto al frame anterior (estable, sin rebote)
+      if (prevDist > 0 && prevMid) {
         const factor = dist / prevDist;
         const nueva = Math.min(Math.max(pv.scale * factor, 0.5), 8);
         const real = nueva / pv.scale;
-        // Zoom hacia el punto medio + seguir el desplazamiento del medio (pan simultáneo)
         pv.tx = mid.x - (prevMid.x - pv.tx) * real + (mid.x - prevMid.x);
         pv.ty = mid.y - (prevMid.y - pv.ty) * real + (mid.y - prevMid.y);
         pv.scale = nueva;
@@ -796,36 +788,41 @@ function initGestosPlano() {
       }
       prevDist = dist;
       prevMid = mid;
-    } else if (p.length === 1) {
-      // Pan con un dedo: usar el delta de movimiento
-      const prev = zona._lastPanPoint;
-      if (prev) {
-        pv.tx += (p[0].x - prev.x);
-        pv.ty += (p[0].y - prev.y);
-        aplicarTransform();
-      }
-      zona._lastPanPoint = { x: p[0].x, y: p[0].y };
+    } else if (p.length === 1 && modoActual === 'pan' && panPoint) {
+      // Solo hacer pan si el gesto EMPEZÓ con un dedo (no venimos de un pinch)
+      pv.tx += (p[0].x - panPoint.x);
+      pv.ty += (p[0].y - panPoint.y);
+      panPoint = { x: p[0].x, y: p[0].y };
+      aplicarTransform();
     }
   });
 
   function endPointer(e) {
     punteros.delete(e.pointerId);
-    prevDist = 0;
-    prevMid = null;
-    zona._lastPanPoint = null;
-    // Si queda un dedo, reiniciar el punto de pan
-    if (punteros.size === 1) {
-      const p = [...punteros.values()][0];
-      zona._lastPanPoint = { x: p.x, y: p.y };
-    }
+    if (punteros.size < 2) { prevDist = 0; prevMid = null; }
+    if (punteros.size === 0) { modoActual = null; panPoint = null; }
+    // IMPORTANTE: si quedó un dedo tras un pinch, NO reactivar pan
+    // (esperar a que levante todos los dedos). Esto evita el salto al soltar.
   }
   zona.addEventListener('pointerup', endPointer);
   zona.addEventListener('pointercancel', endPointer);
-  zona.addEventListener('pointerleave', e => { if (punteros.size === 0) endPointer(e); });
 
-  // Inicializar punto de pan al apoyar un dedo
+  // Determinar modo al apoyar dedos
   zona.addEventListener('pointerdown', e => {
-    if (punteros.size === 1) zona._lastPanPoint = { x: e.clientX, y: e.clientY };
+    punteros.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (punteros.size === 1) {
+      // Un solo dedo desde el inicio → modo pan
+      modoActual = 'pan';
+      panPoint = { x: e.clientX, y: e.clientY };
+    } else if (punteros.size === 2) {
+      // Segundo dedo → modo pinch, cancelar pan
+      modoActual = 'pinch';
+      panPoint = null;
+      const p = [...punteros.values()];
+      const r = getRect();
+      prevDist = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+      prevMid = { x: (p[0].x + p[1].x)/2 - r.left, y: (p[0].y + p[1].y)/2 - r.top };
+    }
   });
 
   // Doble tap
