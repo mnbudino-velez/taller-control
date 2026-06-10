@@ -757,57 +757,72 @@ function zoomEnPunto(factor, cx, cy) {
   aplicarTransform();
 }
 
-// ─── Gestos táctiles: pinch zoom + pan ───
+// ─── Gestos táctiles: pinch zoom + pan (estado fijado al inicio) ───
 function initGestosPlano() {
   const zona = document.getElementById('a-plano-zona');
   let punteros = new Map();
-  let lastDist = 0, lastMid = null;
-  let panning = false, panStart = null;
+  // Estado capturado al INICIO de un gesto (no se recalcula en cada move)
+  let gesto = null;
+
+  function capturarGestoInicial() {
+    const pts = [...punteros.values()];
+    if (pts.length === 2) {
+      const rect = zona.getBoundingClientRect();
+      const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      const midX = (pts[0].x + pts[1].x)/2 - rect.left;
+      const midY = (pts[0].y + pts[1].y)/2 - rect.top;
+      gesto = {
+        modo: 'pinch',
+        distIni: dist,
+        scaleIni: pv.scale,
+        txIni: pv.tx,
+        tyIni: pv.ty,
+        midX, midY
+      };
+    } else if (pts.length === 1) {
+      gesto = {
+        modo: 'pan',
+        startX: pts[0].x - pv.tx,
+        startY: pts[0].y - pv.ty
+      };
+    }
+  }
 
   zona.addEventListener('pointerdown', e => {
     zona.setPointerCapture(e.pointerId);
     punteros.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (punteros.size === 1) {
-      panning = true;
-      panStart = { x: e.clientX - pv.tx, y: e.clientY - pv.ty };
-    } else if (punteros.size === 2) {
-      panning = false;
-      const pts = [...punteros.values()];
-      lastDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
-      lastMid = { x: (pts[0].x + pts[1].x)/2, y: (pts[0].y + pts[1].y)/2 };
-    }
+    capturarGestoInicial();
   });
 
   zona.addEventListener('pointermove', e => {
     if (!punteros.has(e.pointerId)) return;
     punteros.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (!gesto) return;
 
-    if (punteros.size === 2) {
+    if (gesto.modo === 'pinch' && punteros.size === 2) {
       const pts = [...punteros.values()];
       const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
-      const mid = { x: (pts[0].x + pts[1].x)/2, y: (pts[0].y + pts[1].y)/2 };
-      const rect = zona.getBoundingClientRect();
-      if (lastDist > 0) {
-        const factor = dist / lastDist;
-        zoomEnPunto(factor, mid.x - rect.left, mid.y - rect.top);
-      }
-      lastDist = dist; lastMid = mid;
-    } else if (panning && punteros.size === 1) {
-      pv.tx = e.clientX - panStart.x;
-      pv.ty = e.clientY - panStart.y;
+      // Escala calculada SIEMPRE respecto al inicio del gesto (no incremental)
+      let nuevaScale = gesto.scaleIni * (dist / gesto.distIni);
+      nuevaScale = Math.min(Math.max(nuevaScale, 0.5), 8);
+      const factorTotal = nuevaScale / gesto.scaleIni;
+      // El punto medio inicial se mantiene fijo bajo los dedos
+      pv.scale = nuevaScale;
+      pv.tx = gesto.midX - (gesto.midX - gesto.txIni) * factorTotal;
+      pv.ty = gesto.midY - (gesto.midY - gesto.tyIni) * factorTotal;
+      aplicarTransform();
+    } else if (gesto.modo === 'pan' && punteros.size === 1) {
+      pv.tx = e.clientX - gesto.startX;
+      pv.ty = e.clientY - gesto.startY;
       aplicarTransform();
     }
   });
 
   function endPointer(e) {
     punteros.delete(e.pointerId);
-    if (punteros.size < 2) lastDist = 0;
-    if (punteros.size === 1) {
-      const p = [...punteros.values()][0];
-      panning = true;
-      panStart = { x: p.x - pv.tx, y: p.y - pv.ty };
-    }
-    if (punteros.size === 0) panning = false;
+    // Al cambiar la cantidad de dedos, recapturar el estado para el nuevo gesto
+    if (punteros.size > 0) capturarGestoInicial();
+    else gesto = null;
   }
   zona.addEventListener('pointerup', endPointer);
   zona.addEventListener('pointercancel', endPointer);
