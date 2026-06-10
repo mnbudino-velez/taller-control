@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Taller Control</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/panzoom@9.4.3/dist/panzoom.min.js"></script>
 <style>
   :root {
     --blue: #185FA5; --blue-light: #E6F1FB; --blue-dark: #0C447C;
@@ -111,12 +112,8 @@
   .trabajo-meta-item .val { font-size: 14px; font-weight: 600; }
   .sync-indicator { font-size: 11px; color: var(--gray-text); text-align: center; padding: 6px; }
   /* VISOR PDF */
-  #pdf-canvas-wrap { flex:1; overflow:auto; background:#525659; display:flex; align-items:flex-start; justify-content:center; -webkit-overflow-scrolling:touch; touch-action: pinch-zoom; }
-  #pdf-canvas { display:block; margin:auto; box-shadow:0 2px 12px rgba(0,0,0,0.4); }
-  .pdf-toolbar { display:flex; align-items:center; justify-content:center; gap:8px; padding:10px; background:#1a1a1a; flex-shrink:0; }
   .pdf-zoom-btn { background:#333; color:#fff; border:none; border-radius:8px; width:44px; height:44px; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
   .pdf-zoom-btn:active { background:#555; }
-  .pdf-zoom-label { color:#fff; font-size:14px; min-width:54px; text-align:center; }
 </style>
 </head>
 <body>
@@ -260,7 +257,7 @@
 
   <!-- Plano visible directo (zona superior) -->
   <div id="a-plano-zona" style="position:relative;background:#525659;flex:1;min-height:0;overflow:hidden;display:none;touch-action:none">
-    <div id="a-plano-stage" style="position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform">
+    <div id="a-plano-stage" style="position:absolute;top:0;left:0">
       <canvas id="a-pdf-canvas" style="display:block"></canvas>
     </div>
     <div style="position:absolute;bottom:10px;right:10px;display:flex;gap:6px;z-index:5">
@@ -675,10 +672,11 @@ function mostrarResumen(nombre, segs, pausas, ritmo, unidad) {
   document.getElementById('r-operario').textContent = state.operario.nombre;
 }
 
-// ─── VISOR PDF.js INLINE CON PINCH-ZOOM Y PAN ─────────────
+// ─── VISOR PDF.js INLINE — pan/zoom manejado por la librería panzoom ─────────────
 let planoActual = null;
 let pdfDoc = null;
-let pv = { scale: 1, tx: 0, ty: 0, baseW: 0, baseH: 0, fit: 1 };
+let pv = { baseW: 0, baseH: 0 };
+let pzInstance = null;
 
 async function cargarPlanoInline(plano) {
   const [carpetaId, modulo] = plano.split('|');
@@ -732,140 +730,49 @@ async function renderPlanoCanvas() {
   planoReset();
 }
 
-function aplicarTransform() {
+// La librería panzoom maneja todos los gestos (pinch, pan, doble tap, rueda).
+// Se inicializa una sola vez sobre el stage; los eventos los escucha en la zona (su padre).
+function initPanzoomPlano() {
   const stage = document.getElementById('a-plano-stage');
-  stage.style.transform = 'translate(' + pv.tx + 'px,' + pv.ty + 'px) scale(' + pv.scale + ')';
+  pzInstance = panzoom(stage, {
+    maxZoom: 8,
+    minZoom: 0.4,
+    bounds: true,
+    boundsPadding: 0.1,
+    zoomDoubleClickSpeed: 2.5,
+    onTouch: function(e) {
+      // Los toques sobre los botones de zoom no los captura panzoom
+      if (e.target && e.target.closest && e.target.closest('.pdf-zoom-btn')) return false;
+      return true;
+    },
+    beforeMouseDown: function(e) {
+      // En PC: ignorar clicks sobre los botones
+      return !!(e.target && e.target.closest && e.target.closest('.pdf-zoom-btn'));
+    }
+  });
 }
 
 function planoReset() {
+  if (!pzInstance) return;
   const zona = document.getElementById('a-plano-zona');
-  pv.scale = 1;
-  pv.tx = Math.max((zona.clientWidth - pv.baseW) / 2, 0);
-  pv.ty = Math.max((zona.clientHeight - pv.baseH) / 2, 0);
-  aplicarTransform();
+  pzInstance.zoomAbs(0, 0, 1);
+  pzInstance.moveTo(
+    Math.max((zona.clientWidth - pv.baseW) / 2, 0),
+    Math.max((zona.clientHeight - pv.baseH) / 2, 0)
+  );
 }
 
 function planoZoomBtn(dir) {
+  if (!pzInstance) return;
   const zona = document.getElementById('a-plano-zona');
-  zoomEnPunto(dir > 0 ? 1.4 : 1/1.4, zona.clientWidth/2, zona.clientHeight/2);
+  pzInstance.smoothZoom(zona.clientWidth / 2, zona.clientHeight / 2, dir > 0 ? 1.4 : 1/1.4);
 }
 
-function zoomEnPunto(factor, cx, cy) {
-  const nueva = Math.min(Math.max(pv.scale * factor, 0.5), 8);
-  const real = nueva / pv.scale;
-  pv.tx = cx - (cx - pv.tx) * real;
-  pv.ty = cy - (cy - pv.ty) * real;
-  pv.scale = nueva;
-  aplicarTransform();
-}
+// Bloquear el zoom nativo de la página (iOS Safari)
+document.addEventListener('gesturestart', e => e.preventDefault());
+document.addEventListener('gesturechange', e => e.preventDefault());
 
-// ─── Gestos táctiles: modelo ABSOLUTO con congelamiento al soltar ───
-function initGestosPlano() {
-  const zona = document.getElementById('a-plano-zona');
-  const punteros = new Map();
-
-  // Estado FIJADO al inicio de cada gesto. Nunca se recalcula durante el gesto.
-  let anchor = null;   // { d0, s0, tx0, ty0, mx0, my0 }  para pinch
-  let panRef = null;   // { x, y, tx0, ty0 }              para pan
-  let gestoActivo = false;
-
-  function getRect() { return zona.getBoundingClientRect(); }
-
-  function iniciarGesto() {
-    const p = [...punteros.values()];
-    const r = getRect();
-    if (p.length === 2) {
-      const d0 = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
-      anchor = {
-        d0: d0,
-        s0: pv.scale,
-        tx0: pv.tx,
-        ty0: pv.ty,
-        mx0: (p[0].x + p[1].x)/2 - r.left,
-        my0: (p[0].y + p[1].y)/2 - r.top
-      };
-      panRef = null;
-      gestoActivo = true;
-    } else if (p.length === 1) {
-      panRef = { x: p[0].x, y: p[0].y, tx0: pv.tx, ty0: pv.ty };
-      anchor = null;
-      gestoActivo = true;
-    }
-  }
-
-  zona.addEventListener('pointerdown', e => {
-    punteros.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    iniciarGesto(); // refija el estado cada vez que cambia la cantidad de dedos
-  });
-
-  zona.addEventListener('pointermove', e => {
-    if (!punteros.has(e.pointerId) || !gestoActivo) return;
-    punteros.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    const p = [...punteros.values()];
-    const r = getRect();
-
-    // PINCH: requiere exactamente 2 dedos Y tener anchor de pinch
-    if (p.length === 2 && anchor) {
-      const d = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
-      const mx = (p[0].x + p[1].x)/2 - r.left;
-      const my = (p[0].y + p[1].y)/2 - r.top;
-      // Escala ABSOLUTA respecto al inicio del gesto
-      let s = anchor.s0 * (d / anchor.d0);
-      s = Math.min(Math.max(s, 0.5), 8);
-      const factor = s / anchor.s0;
-      pv.scale = s;
-      // Mantener fijo el punto del contenido bajo el centro inicial, y seguir el centro actual
-      pv.tx = mx - (anchor.mx0 - anchor.tx0) * factor;
-      pv.ty = my - (anchor.my0 - anchor.ty0) * factor;
-      aplicarTransform();
-    }
-    // PAN: exactamente 1 dedo Y tener panRef
-    else if (p.length === 1 && panRef) {
-      pv.tx = panRef.tx0 + (p[0].x - panRef.x);
-      pv.ty = panRef.ty0 + (p[0].y - panRef.y);
-      aplicarTransform();
-    }
-  });
-
-  function endPointer(e) {
-    punteros.delete(e.pointerId);
-    // CONGELAR: apenas se levanta cualquier dedo, desactivar el gesto actual.
-    // Ningún evento posterior modifica el zoom hasta que se refije con un nuevo pointerdown.
-    gestoActivo = false;
-    anchor = null;
-    panRef = null;
-    // Si todavía queda algún dedo, NO refijamos automáticamente:
-    // el usuario debe iniciar un gesto nuevo (levantar todo y volver a tocar).
-  }
-  zona.addEventListener('pointerup', endPointer);
-  zona.addEventListener('pointercancel', endPointer);
-
-  // Doble tap para zoom
-  let lastTap = 0;
-  zona.addEventListener('pointerup', e => {
-    const now = Date.now();
-    if (now - lastTap < 300 && punteros.size === 0) {
-      const r = getRect();
-      const factor = pv.scale > 1.5 ? (1/pv.scale) : 2.5;
-      zoomEnPunto(factor, e.clientX - r.left, e.clientY - r.top);
-    }
-    lastTap = now;
-  });
-
-  // Rueda mouse (PC)
-  zona.addEventListener('wheel', e => {
-    e.preventDefault();
-    const r = getRect();
-    zoomEnPunto(e.deltaY < 0 ? 1.15 : 1/1.15, e.clientX - r.left, e.clientY - r.top);
-  }, { passive: false });
-
-  // Bloquear gestos nativos
-  zona.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
-  zona.addEventListener('gesturestart', e => e.preventDefault());
-  zona.addEventListener('gesturechange', e => e.preventDefault());
-}
-
-window.addEventListener('load', () => { iniciarApp(); initGestosPlano(); });
+window.addEventListener('load', () => { iniciarApp(); initPanzoomPlano(); });
 </script>
 </body>
 </html>
