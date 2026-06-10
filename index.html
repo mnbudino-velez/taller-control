@@ -678,8 +678,7 @@ function mostrarResumen(nombre, segs, pausas, ritmo, unidad) {
 // ─── VISOR PDF.js INLINE CON PINCH-ZOOM Y PAN ─────────────
 let planoActual = null;
 let pdfDoc = null;
-// Estado de transformación del plano
-let pv = { scale: 1, tx: 0, ty: 0, baseW: 0, baseH: 0 };
+let pv = { scale: 1, tx: 0, ty: 0, baseW: 0, baseH: 0, fit: 1 };
 
 async function cargarPlanoInline(plano) {
   const [carpetaId, modulo] = plano.split('|');
@@ -697,7 +696,7 @@ async function cargarPlanoInline(plano) {
     console.error('Error cargando PDF:', e);
     document.getElementById('a-plano-zona').style.display = 'none';
     document.getElementById('a-plano-placeholder').style.display = 'block';
-    document.getElementById('a-plano-placeholder').textContent = '⚠️ No se pudo cargar el plano';
+    document.getElementById('a-plano-placeholder').textContent = '\u26a0\ufe0f No se pudo cargar el plano';
   }
 }
 
@@ -708,23 +707,19 @@ async function renderPlanoCanvas() {
   const ctx = canvas.getContext('2d');
   const zona = document.getElementById('a-plano-zona');
 
-  // Esperar a que la zona tenga tamaño real
   await new Promise(r => requestAnimationFrame(r));
   const zonaW = zona.clientWidth || window.innerWidth;
   const zonaH = zona.clientHeight || 400;
 
   const vp1 = page.getViewport({ scale: 1 });
-  // Escala para que el plano entre completo en la zona (ancho o alto, el que limite)
   const escalaAjuste = Math.min(zonaW / vp1.width, zonaH / vp1.height);
 
-  // Renderizar a 2x esa escala de ajuste para nitidez
-  const renderScale = escalaAjuste * 2;
+  const renderScale = escalaAjuste * 2; // 2x para nitidez
   const viewport = page.getViewport({ scale: renderScale });
   canvas.width = viewport.width;
   canvas.height = viewport.height;
   await page.render({ canvasContext: ctx, viewport }).promise;
 
-  // Tamaño visual base = que entre completo (la mitad del render 2x)
   pv.baseW = viewport.width / 2;
   pv.baseH = viewport.height / 2;
   canvas.style.width = pv.baseW + 'px';
@@ -735,13 +730,12 @@ async function renderPlanoCanvas() {
 
 function aplicarTransform() {
   const stage = document.getElementById('a-plano-stage');
-  stage.style.transform = `translate(${pv.tx}px, ${pv.ty}px) scale(${pv.scale})`;
+  stage.style.transform = 'translate(' + pv.tx + 'px,' + pv.ty + 'px) scale(' + pv.scale + ')';
 }
 
 function planoReset() {
   const zona = document.getElementById('a-plano-zona');
   pv.scale = 1;
-  // Centrar horizontal y verticalmente
   pv.tx = Math.max((zona.clientWidth - pv.baseW) / 2, 0);
   pv.ty = Math.max((zona.clientHeight - pv.baseH) / 2, 0);
   aplicarTransform();
@@ -749,117 +743,111 @@ function planoReset() {
 
 function planoZoomBtn(dir) {
   const zona = document.getElementById('a-plano-zona');
-  const cx = zona.clientWidth / 2, cy = zona.clientHeight / 2;
-  const factor = dir > 0 ? 1.4 : 1/1.4;
-  zoomEnPunto(factor, cx, cy);
+  zoomEnPunto(dir > 0 ? 1.4 : 1/1.4, zona.clientWidth/2, zona.clientHeight/2);
 }
 
 function zoomEnPunto(factor, cx, cy) {
   const nueva = Math.min(Math.max(pv.scale * factor, 0.5), 8);
   const real = nueva / pv.scale;
-  // Ajustar traslación para hacer zoom hacia el punto (cx,cy)
   pv.tx = cx - (cx - pv.tx) * real;
   pv.ty = cy - (cy - pv.ty) * real;
   pv.scale = nueva;
   aplicarTransform();
 }
 
-// ─── Gestos táctiles: pinch zoom + pan (estado fijado al inicio) ───
+// ─── Gestos táctiles (modelo incremental simple y estable) ───
 function initGestosPlano() {
   const zona = document.getElementById('a-plano-zona');
-  let punteros = new Map();
-  // Estado capturado al INICIO de un gesto (no se recalcula en cada move)
-  let gesto = null;
+  const punteros = new Map();
+  let prevDist = 0;      // distancia entre dedos en el frame anterior
+  let prevMid = null;    // punto medio en el frame anterior
 
-  function capturarGestoInicial() {
-    const pts = [...punteros.values()];
-    if (pts.length === 2) {
-      const rect = zona.getBoundingClientRect();
-      const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
-      const midX = (pts[0].x + pts[1].x)/2 - rect.left;
-      const midY = (pts[0].y + pts[1].y)/2 - rect.top;
-      gesto = {
-        modo: 'pinch',
-        distIni: dist,
-        scaleIni: pv.scale,
-        txIni: pv.tx,
-        tyIni: pv.ty,
-        midX, midY
-      };
-    } else if (pts.length === 1) {
-      gesto = {
-        modo: 'pan',
-        startX: pts[0].x - pv.tx,
-        startY: pts[0].y - pv.ty
-      };
-    }
-  }
+  function getRect() { return zona.getBoundingClientRect(); }
 
   zona.addEventListener('pointerdown', e => {
     punteros.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    capturarGestoInicial();
+    if (punteros.size === 2) {
+      const p = [...punteros.values()];
+      prevDist = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+      const r = getRect();
+      prevMid = { x: (p[0].x + p[1].x)/2 - r.left, y: (p[0].y + p[1].y)/2 - r.top };
+    }
   });
 
   zona.addEventListener('pointermove', e => {
     if (!punteros.has(e.pointerId)) return;
     punteros.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (!gesto) return;
+    const p = [...punteros.values()];
+    const r = getRect();
 
-    if (gesto.modo === 'pinch' && punteros.size === 2) {
-      const pts = [...punteros.values()];
-      const rect = zona.getBoundingClientRect();
-      const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
-      // Punto medio actual entre los dedos (relativo a la zona)
-      const midX = (pts[0].x + pts[1].x)/2 - rect.left;
-      const midY = (pts[0].y + pts[1].y)/2 - rect.top;
-      // Escala respecto al inicio del gesto (no incremental, evita el rebote)
-      let nuevaScale = gesto.scaleIni * (dist / gesto.distIni);
-      nuevaScale = Math.min(Math.max(nuevaScale, 0.5), 8);
-      // Coordenada del contenido bajo el punto medio inicial, se mantiene fija
-      // Usamos el punto medio INICIAL anclado al contenido + desplazamiento del medio actual
-      const factorTotal = nuevaScale / gesto.scaleIni;
-      pv.scale = nuevaScale;
-      // Anclar el punto medio inicial del contenido, y seguir el desplazamiento de los dedos
-      pv.tx = midX - (gesto.midX - gesto.txIni) * factorTotal;
-      pv.ty = midY - (gesto.midY - gesto.tyIni) * factorTotal;
-      aplicarTransform();
-    } else if (gesto.modo === 'pan' && punteros.size === 1) {
-      pv.tx = e.clientX - gesto.startX;
-      pv.ty = e.clientY - gesto.startY;
-      aplicarTransform();
+    if (p.length === 2) {
+      const dist = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+      const mid = { x: (p[0].x + p[1].x)/2 - r.left, y: (p[0].y + p[1].y)/2 - r.top };
+      if (prevDist > 0) {
+        // Zoom incremental respecto al frame anterior (estable, sin rebote)
+        const factor = dist / prevDist;
+        const nueva = Math.min(Math.max(pv.scale * factor, 0.5), 8);
+        const real = nueva / pv.scale;
+        // Zoom hacia el punto medio + seguir el desplazamiento del medio (pan simultáneo)
+        pv.tx = mid.x - (prevMid.x - pv.tx) * real + (mid.x - prevMid.x);
+        pv.ty = mid.y - (prevMid.y - pv.ty) * real + (mid.y - prevMid.y);
+        pv.scale = nueva;
+        aplicarTransform();
+      }
+      prevDist = dist;
+      prevMid = mid;
+    } else if (p.length === 1) {
+      // Pan con un dedo: usar el delta de movimiento
+      const prev = zona._lastPanPoint;
+      if (prev) {
+        pv.tx += (p[0].x - prev.x);
+        pv.ty += (p[0].y - prev.y);
+        aplicarTransform();
+      }
+      zona._lastPanPoint = { x: p[0].x, y: p[0].y };
     }
   });
 
   function endPointer(e) {
     punteros.delete(e.pointerId);
-    // Al cambiar la cantidad de dedos, recapturar el estado para el nuevo gesto
-    if (punteros.size > 0) capturarGestoInicial();
-    else gesto = null;
+    prevDist = 0;
+    prevMid = null;
+    zona._lastPanPoint = null;
+    // Si queda un dedo, reiniciar el punto de pan
+    if (punteros.size === 1) {
+      const p = [...punteros.values()][0];
+      zona._lastPanPoint = { x: p.x, y: p.y };
+    }
   }
   zona.addEventListener('pointerup', endPointer);
   zona.addEventListener('pointercancel', endPointer);
+  zona.addEventListener('pointerleave', e => { if (punteros.size === 0) endPointer(e); });
 
-  // Doble tap para zoom rápido
+  // Inicializar punto de pan al apoyar un dedo
+  zona.addEventListener('pointerdown', e => {
+    if (punteros.size === 1) zona._lastPanPoint = { x: e.clientX, y: e.clientY };
+  });
+
+  // Doble tap
   let lastTap = 0;
   zona.addEventListener('pointerup', e => {
     const now = Date.now();
     if (now - lastTap < 300 && punteros.size === 0) {
-      const rect = zona.getBoundingClientRect();
+      const r = getRect();
       const factor = pv.scale > 1.5 ? (1/pv.scale) : 2.5;
-      zoomEnPunto(factor, e.clientX - rect.left, e.clientY - rect.top);
+      zoomEnPunto(factor, e.clientX - r.left, e.clientY - r.top);
     }
     lastTap = now;
   });
 
-  // Zoom con rueda del mouse (para probar en PC)
+  // Rueda mouse (PC)
   zona.addEventListener('wheel', e => {
     e.preventDefault();
-    const rect = zona.getBoundingClientRect();
-    const factor = e.deltaY < 0 ? 1.15 : 1/1.15;
-    zoomEnPunto(factor, e.clientX - rect.left, e.clientY - rect.top);
+    const r = getRect();
+    zoomEnPunto(e.deltaY < 0 ? 1.15 : 1/1.15, e.clientX - r.left, e.clientY - r.top);
   }, { passive: false });
 
-  // Prevenir que el navegador haga su propio gesto de zoom
+  // Bloquear gestos nativos del navegador
   zona.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
   zona.addEventListener('gesturestart', e => e.preventDefault());
   zona.addEventListener('gesturechange', e => e.preventDefault());
