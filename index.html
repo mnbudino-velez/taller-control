@@ -708,20 +708,28 @@ async function renderPlanoCanvas() {
   const ctx = canvas.getContext('2d');
   const zona = document.getElementById('a-plano-zona');
 
-  // Renderizar a alta resolución (2x) para que el zoom no pixele
-  const renderScale = (zona.clientWidth / page.getViewport({scale:1}).width) * 2;
+  // Esperar a que la zona tenga tamaño real
+  await new Promise(r => requestAnimationFrame(r));
+  const zonaW = zona.clientWidth || window.innerWidth;
+  const zonaH = zona.clientHeight || 400;
+
+  const vp1 = page.getViewport({ scale: 1 });
+  // Escala para que el plano entre completo en la zona (ancho o alto, el que limite)
+  const escalaAjuste = Math.min(zonaW / vp1.width, zonaH / vp1.height);
+
+  // Renderizar a 2x esa escala de ajuste para nitidez
+  const renderScale = escalaAjuste * 2;
   const viewport = page.getViewport({ scale: renderScale });
   canvas.width = viewport.width;
   canvas.height = viewport.height;
   await page.render({ canvasContext: ctx, viewport }).promise;
 
-  // Tamaño visual base (la mitad porque renderizamos a 2x)
+  // Tamaño visual base = que entre completo (la mitad del render 2x)
   pv.baseW = viewport.width / 2;
   pv.baseH = viewport.height / 2;
   canvas.style.width = pv.baseW + 'px';
   canvas.style.height = pv.baseH + 'px';
 
-  // Centrar y resetear transform
   planoReset();
 }
 
@@ -733,10 +741,9 @@ function aplicarTransform() {
 function planoReset() {
   const zona = document.getElementById('a-plano-zona');
   pv.scale = 1;
-  // Centrar horizontalmente, arriba verticalmente
-  pv.tx = (zona.clientWidth - pv.baseW) / 2;
-  pv.ty = 8;
-  if (pv.tx < 0) pv.tx = 0;
+  // Centrar horizontal y verticalmente
+  pv.tx = Math.max((zona.clientWidth - pv.baseW) / 2, 0);
+  pv.ty = Math.max((zona.clientHeight - pv.baseH) / 2, 0);
   aplicarTransform();
 }
 
@@ -789,7 +796,6 @@ function initGestosPlano() {
   }
 
   zona.addEventListener('pointerdown', e => {
-    zona.setPointerCapture(e.pointerId);
     punteros.set(e.pointerId, { x: e.clientX, y: e.clientY });
     capturarGestoInicial();
   });
