@@ -714,14 +714,18 @@ async function renderPlanoCanvas() {
   const vp1 = page.getViewport({ scale: 1 });
   const escalaAjuste = Math.min(zonaW / vp1.width, zonaH / vp1.height);
 
-  const renderScale = escalaAjuste * 2; // 2x para nitidez
+  // Render a la densidad real del dispositivo x un extra para permitir zoom nítido
+  const dpr = window.devicePixelRatio || 1;
+  const superSample = Math.max(dpr * 2, 3); // mínimo 3x
+  const renderScale = escalaAjuste * superSample;
   const viewport = page.getViewport({ scale: renderScale });
   canvas.width = viewport.width;
   canvas.height = viewport.height;
   await page.render({ canvasContext: ctx, viewport }).promise;
 
-  pv.baseW = viewport.width / 2;
-  pv.baseH = viewport.height / 2;
+  // Tamaño visual = el de ajuste (dividimos por el supersample)
+  pv.baseW = viewport.width / superSample;
+  pv.baseH = viewport.height / superSample;
   canvas.style.width = pv.baseW + 'px';
   canvas.style.height = pv.baseH + 'px';
 
@@ -766,9 +770,11 @@ function initGestosPlano() {
 
   let modoActual = null; // 'pan' | 'pinch' | null
   let panPoint = null;
+  let bloqueadoHasta = 0;
 
   zona.addEventListener('pointermove', e => {
     if (!punteros.has(e.pointerId)) return;
+    if (Date.now() < bloqueadoHasta) return; // ignorar movimientos fantasma post-soltar
     punteros.set(e.pointerId, { x: e.clientX, y: e.clientY });
     const p = [...punteros.values()];
     const r = getRect();
@@ -801,8 +807,9 @@ function initGestosPlano() {
     punteros.delete(e.pointerId);
     if (punteros.size < 2) { prevDist = 0; prevMid = null; }
     if (punteros.size === 0) { modoActual = null; panPoint = null; }
-    // IMPORTANTE: si quedó un dedo tras un pinch, NO reactivar pan
-    // (esperar a que levante todos los dedos). Esto evita el salto al soltar.
+    // Bloquear cualquier movimiento por 120ms tras levantar un dedo,
+    // para ignorar el pointermove fantasma que dispara el navegador al soltar
+    bloqueadoHasta = Date.now() + 120;
   }
   zona.addEventListener('pointerup', endPointer);
   zona.addEventListener('pointercancel', endPointer);
