@@ -801,15 +801,21 @@ function initGestosPlano() {
 
     if (gesto.modo === 'pinch' && punteros.size === 2) {
       const pts = [...punteros.values()];
+      const rect = zona.getBoundingClientRect();
       const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
-      // Escala calculada SIEMPRE respecto al inicio del gesto (no incremental)
+      // Punto medio actual entre los dedos (relativo a la zona)
+      const midX = (pts[0].x + pts[1].x)/2 - rect.left;
+      const midY = (pts[0].y + pts[1].y)/2 - rect.top;
+      // Escala respecto al inicio del gesto (no incremental, evita el rebote)
       let nuevaScale = gesto.scaleIni * (dist / gesto.distIni);
       nuevaScale = Math.min(Math.max(nuevaScale, 0.5), 8);
+      // Coordenada del contenido bajo el punto medio inicial, se mantiene fija
+      // Usamos el punto medio INICIAL anclado al contenido + desplazamiento del medio actual
       const factorTotal = nuevaScale / gesto.scaleIni;
-      // El punto medio inicial se mantiene fijo bajo los dedos
       pv.scale = nuevaScale;
-      pv.tx = gesto.midX - (gesto.midX - gesto.txIni) * factorTotal;
-      pv.ty = gesto.midY - (gesto.midY - gesto.tyIni) * factorTotal;
+      // Anclar el punto medio inicial del contenido, y seguir el desplazamiento de los dedos
+      pv.tx = midX - (gesto.midX - gesto.txIni) * factorTotal;
+      pv.ty = midY - (gesto.midY - gesto.tyIni) * factorTotal;
       aplicarTransform();
     } else if (gesto.modo === 'pan' && punteros.size === 1) {
       pv.tx = e.clientX - gesto.startX;
@@ -838,6 +844,19 @@ function initGestosPlano() {
     }
     lastTap = now;
   });
+
+  // Zoom con rueda del mouse (para probar en PC)
+  zona.addEventListener('wheel', e => {
+    e.preventDefault();
+    const rect = zona.getBoundingClientRect();
+    const factor = e.deltaY < 0 ? 1.15 : 1/1.15;
+    zoomEnPunto(factor, e.clientX - rect.left, e.clientY - rect.top);
+  }, { passive: false });
+
+  // Prevenir que el navegador haga su propio gesto de zoom
+  zona.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  zona.addEventListener('gesturestart', e => e.preventDefault());
+  zona.addEventListener('gesturechange', e => e.preventDefault());
 }
 
 window.addEventListener('load', () => { iniciarApp(); initGestosPlano(); });
