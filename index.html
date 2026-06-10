@@ -257,29 +257,37 @@
     <button class="btn-back" onclick="confirmarVolver('s-modulos')">← Volver</button>
     <div style="text-align:right"><div class="topbar-title" id="a-modulo-nombre"></div><div class="topbar-sub" id="a-trabajo-nombre"></div></div>
   </div>
-  <div class="content">
-    <div id="a-plano-box" style="margin-bottom:14px">
-      <div id="a-plano-placeholder" style="background:var(--white);border-radius:var(--radius);border:1px solid var(--gray-border);min-height:120px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--gray-text);padding:20px;text-align:center">
-        <div style="font-size:36px">📐</div>
-        <p id="a-plano-txt">Sin plano cargado</p>
+
+  <!-- Plano visible directo (zona superior) -->
+  <div id="a-plano-zona" style="position:relative;background:#525659;flex:1;min-height:0;overflow:hidden;display:none;touch-action:none">
+    <div id="a-plano-stage" style="position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform">
+      <canvas id="a-pdf-canvas" style="display:block"></canvas>
+    </div>
+    <div style="position:absolute;bottom:10px;right:10px;display:flex;gap:6px;z-index:5">
+      <button class="pdf-zoom-btn" onclick="planoZoomBtn(-1)">−</button>
+      <button class="pdf-zoom-btn" onclick="planoZoomBtn(1)">+</button>
+      <button class="pdf-zoom-btn" onclick="planoReset()" style="font-size:14px">⟲</button>
+    </div>
+  </div>
+  <div id="a-plano-placeholder" style="background:#eee;padding:14px;text-align:center;color:var(--gray-text);font-size:13px;display:none">
+    📐 Sin plano cargado para este módulo
+  </div>
+
+  <!-- Barra inferior fija: info + crono + botones -->
+  <div style="background:var(--white);border-top:1px solid var(--gray-border);padding:12px 16px;flex-shrink:0">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="display:flex;gap:18px">
+        <div><div style="font-size:10px;color:var(--gray-text);text-transform:uppercase">Piezas</div><div style="font-size:18px;font-weight:700" id="a-piezas">—</div></div>
+        <div><div style="font-size:10px;color:var(--gray-text);text-transform:uppercase">Complej.</div><div style="font-size:18px;font-weight:700" id="a-complejidad">—</div></div>
       </div>
-      <div id="a-plano-visor" style="display:none">
-        <button onclick="abrirModalPlano()" style="width:100%;padding:16px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius);font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px">
-          📐 Ver plano — <span id="a-plano-titulo"></span>
-        </button>
+      <div style="text-align:right">
+        <div class="crono-time" id="a-time" style="font-size:34px">00:00:00</div>
+        <div class="crono-pausas" id="a-pausas" style="display:none"></div>
       </div>
     </div>
-    <div class="info-row">
-      <div class="info-box"><div class="info-label">Piezas</div><div class="info-val" id="a-piezas">—</div></div>
-      <div class="info-box"><div class="info-label">Complejidad</div><div class="info-val" id="a-complejidad">—</div></div>
-    </div>
-    <div class="crono-box">
-      <div class="crono-time" id="a-time">00:00:00</div>
-      <div class="crono-status" id="a-status">Listo para iniciar</div>
-      <div class="crono-pausas" id="a-pausas" style="display:none"></div>
-    </div>
-    <button class="btn-xl btn-play" id="a-btn-play" onclick="accionCronoArmado()">▶ Iniciar armado</button>
-    <button class="btn-xl btn-stop" id="a-btn-stop" onclick="guardarArmado()" style="display:none">⏹ Módulo terminado — guardar</button>
+    <div id="a-status" style="font-size:12px;color:var(--gray-text);text-align:center;margin-bottom:8px">Listo para iniciar</div>
+    <button class="btn-xl btn-play" id="a-btn-play" onclick="accionCronoArmado()" style="margin-bottom:8px">▶ Iniciar armado</button>
+    <button class="btn-xl btn-stop" id="a-btn-stop" onclick="guardarArmado()" style="display:none;margin-bottom:0">⏹ Módulo terminado — guardar</button>
   </div>
 </div>
 
@@ -303,21 +311,7 @@
   </div>
 </div>
 
-<!-- MODAL PLANO PDF.js -->
-<div id="modal-plano" style="display:none;position:fixed;inset:0;background:#000;z-index:9999;flex-direction:column">
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#1a1a1a;flex-shrink:0">
-    <span id="modal-plano-titulo" style="color:#fff;font-size:15px;font-weight:600"></span>
-    <button onclick="cerrarModalPlano()" style="background:#333;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer">✕ Cerrar</button>
-  </div>
-  <div id="pdf-canvas-wrap">
-    <canvas id="pdf-canvas"></canvas>
-  </div>
-  <div class="pdf-toolbar">
-    <button class="pdf-zoom-btn" onclick="pdfZoomOut()">−</button>
-    <span class="pdf-zoom-label" id="pdf-zoom-label">100%</span>
-    <button class="pdf-zoom-btn" onclick="pdfZoomIn()">+</button>
-  </div>
-</div>
+
 
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -619,19 +613,22 @@ function abrirModulo(m) {
   document.getElementById('a-btn-stop').style.display = 'none';
 
   // Plano: url_plano ahora es "carpetaId|modulo"
+  const zona = document.getElementById('a-plano-zona');
+  const ph   = document.getElementById('a-plano-placeholder');
   if (m.url_plano && m.url_plano.trim() && m.url_plano.includes('|')) {
-    document.getElementById('a-plano-placeholder').style.display = 'none';
-    document.getElementById('a-plano-visor').style.display = 'block';
-    document.getElementById('a-plano-titulo').textContent = 'Módulo ' + m.nombre;
-    planoActual = m.url_plano; // guardamos para cargar al abrir modal
+    zona.style.display = 'block';
+    ph.style.display = 'none';
+    planoActual = m.url_plano;
+    document.querySelectorAll('.login-wrap').forEach(s => s.style.display='none');
+    ir('s-armado');
+    cargarPlanoInline(m.url_plano);  // cargar el PDF directo en la pantalla
   } else {
-    document.getElementById('a-plano-placeholder').style.display = 'flex';
-    document.getElementById('a-plano-visor').style.display = 'none';
-    document.getElementById('a-plano-txt').textContent = 'Sin plano cargado';
+    zona.style.display = 'none';
+    ph.style.display = 'block';
     planoActual = null;
+    document.querySelectorAll('.login-wrap').forEach(s => s.style.display='none');
+    ir('s-armado');
   }
-  document.querySelectorAll('.login-wrap').forEach(s => s.style.display='none');
-  ir('s-armado');
 }
 
 function accionCronoArmado() {
@@ -678,68 +675,157 @@ function mostrarResumen(nombre, segs, pausas, ritmo, unidad) {
   document.getElementById('r-operario').textContent = state.operario.nombre;
 }
 
-// ─── VISOR PDF.js CON PROXY ───────────────────
-let planoActual = null;      // "carpetaId|modulo"
+// ─── VISOR PDF.js INLINE CON PINCH-ZOOM Y PAN ─────────────
+let planoActual = null;
 let pdfDoc = null;
-let pdfScale = 1.0;
-let pdfBaseScale = 1.0;
+// Estado de transformación del plano
+let pv = { scale: 1, tx: 0, ty: 0, baseW: 0, baseH: 0 };
 
-async function abrirModalPlano() {
-  if (!planoActual) return;
-  const [carpetaId, modulo] = planoActual.split('|');
-  const modal = document.getElementById('modal-plano');
-  document.getElementById('modal-plano-titulo').textContent = 'Módulo ' + modulo;
-  modal.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-
+async function cargarPlanoInline(plano) {
+  const [carpetaId, modulo] = plano.split('|');
   mostrarLoading('Cargando plano...');
   try {
     const res = await scriptCall({ action:'getPDF', carpeta_id: carpetaId, modulo: modulo });
-    // Convertir base64 a Uint8Array
     const raw = atob(res.base64);
     const bytes = new Uint8Array(raw.length);
     for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
-
     pdfDoc = await pdfjsLib.getDocument({ data: bytes }).promise;
-    pdfScale = 1.0;
-    await renderPlano();
+    await renderPlanoCanvas();
     ocultarLoading();
   } catch(e) {
     ocultarLoading();
     console.error('Error cargando PDF:', e);
-    alert('No se pudo cargar el plano: ' + e.message);
-    cerrarModalPlano();
+    document.getElementById('a-plano-zona').style.display = 'none';
+    document.getElementById('a-plano-placeholder').style.display = 'block';
+    document.getElementById('a-plano-placeholder').textContent = '⚠️ No se pudo cargar el plano';
   }
 }
 
-async function renderPlano() {
+async function renderPlanoCanvas() {
   if (!pdfDoc) return;
   const page = await pdfDoc.getPage(1);
-  const canvas = document.getElementById('pdf-canvas');
+  const canvas = document.getElementById('a-pdf-canvas');
   const ctx = canvas.getContext('2d');
-  const wrap = document.getElementById('pdf-canvas-wrap');
+  const zona = document.getElementById('a-plano-zona');
 
-  // Calcular escala base para que entre en el ancho
-  const baseViewport = page.getViewport({ scale: 1 });
-  pdfBaseScale = (wrap.clientWidth - 24) / baseViewport.width;
-
-  const viewport = page.getViewport({ scale: pdfBaseScale * pdfScale });
+  // Renderizar a alta resolución (2x) para que el zoom no pixele
+  const renderScale = (zona.clientWidth / page.getViewport({scale:1}).width) * 2;
+  const viewport = page.getViewport({ scale: renderScale });
   canvas.width = viewport.width;
   canvas.height = viewport.height;
   await page.render({ canvasContext: ctx, viewport }).promise;
-  document.getElementById('pdf-zoom-label').textContent = Math.round(pdfScale * 100) + '%';
+
+  // Tamaño visual base (la mitad porque renderizamos a 2x)
+  pv.baseW = viewport.width / 2;
+  pv.baseH = viewport.height / 2;
+  canvas.style.width = pv.baseW + 'px';
+  canvas.style.height = pv.baseH + 'px';
+
+  // Centrar y resetear transform
+  planoReset();
 }
 
-function pdfZoomIn()  { pdfScale = Math.min(pdfScale + 0.5, 6); renderPlano(); }
-function pdfZoomOut() { pdfScale = Math.max(pdfScale - 0.5, 1); renderPlano(); }
-
-function cerrarModalPlano() {
-  document.getElementById('modal-plano').style.display = 'none';
-  document.body.style.overflow = '';
-  pdfDoc = null;
+function aplicarTransform() {
+  const stage = document.getElementById('a-plano-stage');
+  stage.style.transform = `translate(${pv.tx}px, ${pv.ty}px) scale(${pv.scale})`;
 }
 
-window.addEventListener('load', iniciarApp);
+function planoReset() {
+  const zona = document.getElementById('a-plano-zona');
+  pv.scale = 1;
+  // Centrar horizontalmente, arriba verticalmente
+  pv.tx = (zona.clientWidth - pv.baseW) / 2;
+  pv.ty = 8;
+  if (pv.tx < 0) pv.tx = 0;
+  aplicarTransform();
+}
+
+function planoZoomBtn(dir) {
+  const zona = document.getElementById('a-plano-zona');
+  const cx = zona.clientWidth / 2, cy = zona.clientHeight / 2;
+  const factor = dir > 0 ? 1.4 : 1/1.4;
+  zoomEnPunto(factor, cx, cy);
+}
+
+function zoomEnPunto(factor, cx, cy) {
+  const nueva = Math.min(Math.max(pv.scale * factor, 0.5), 8);
+  const real = nueva / pv.scale;
+  // Ajustar traslación para hacer zoom hacia el punto (cx,cy)
+  pv.tx = cx - (cx - pv.tx) * real;
+  pv.ty = cy - (cy - pv.ty) * real;
+  pv.scale = nueva;
+  aplicarTransform();
+}
+
+// ─── Gestos táctiles: pinch zoom + pan ───
+function initGestosPlano() {
+  const zona = document.getElementById('a-plano-zona');
+  let punteros = new Map();
+  let lastDist = 0, lastMid = null;
+  let panning = false, panStart = null;
+
+  zona.addEventListener('pointerdown', e => {
+    zona.setPointerCapture(e.pointerId);
+    punteros.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (punteros.size === 1) {
+      panning = true;
+      panStart = { x: e.clientX - pv.tx, y: e.clientY - pv.ty };
+    } else if (punteros.size === 2) {
+      panning = false;
+      const pts = [...punteros.values()];
+      lastDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      lastMid = { x: (pts[0].x + pts[1].x)/2, y: (pts[0].y + pts[1].y)/2 };
+    }
+  });
+
+  zona.addEventListener('pointermove', e => {
+    if (!punteros.has(e.pointerId)) return;
+    punteros.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (punteros.size === 2) {
+      const pts = [...punteros.values()];
+      const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      const mid = { x: (pts[0].x + pts[1].x)/2, y: (pts[0].y + pts[1].y)/2 };
+      const rect = zona.getBoundingClientRect();
+      if (lastDist > 0) {
+        const factor = dist / lastDist;
+        zoomEnPunto(factor, mid.x - rect.left, mid.y - rect.top);
+      }
+      lastDist = dist; lastMid = mid;
+    } else if (panning && punteros.size === 1) {
+      pv.tx = e.clientX - panStart.x;
+      pv.ty = e.clientY - panStart.y;
+      aplicarTransform();
+    }
+  });
+
+  function endPointer(e) {
+    punteros.delete(e.pointerId);
+    if (punteros.size < 2) lastDist = 0;
+    if (punteros.size === 1) {
+      const p = [...punteros.values()][0];
+      panning = true;
+      panStart = { x: p.x - pv.tx, y: p.y - pv.ty };
+    }
+    if (punteros.size === 0) panning = false;
+  }
+  zona.addEventListener('pointerup', endPointer);
+  zona.addEventListener('pointercancel', endPointer);
+
+  // Doble tap para zoom rápido
+  let lastTap = 0;
+  zona.addEventListener('pointerup', e => {
+    const now = Date.now();
+    if (now - lastTap < 300 && punteros.size === 0) {
+      const rect = zona.getBoundingClientRect();
+      const factor = pv.scale > 1.5 ? (1/pv.scale) : 2.5;
+      zoomEnPunto(factor, e.clientX - rect.left, e.clientY - rect.top);
+    }
+    lastTap = now;
+  });
+}
+
+window.addEventListener('load', () => { iniciarApp(); initGestosPlano(); });
 </script>
 </body>
 </html>
