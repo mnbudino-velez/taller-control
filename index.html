@@ -8,7 +8,7 @@
 <title>Taller Control</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/panzoom@9.4.3/dist/panzoom.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
 <style>
   :root {
     --blue: #185FA5; --blue-light: #E6F1FB; --blue-dark: #0C447C;
@@ -314,14 +314,14 @@
 
 
 <!-- VISOR 3D -->
-<div id="s-3d" class="screen">
-  <div class="topbar" style="background:#1a1a1a;border-bottom:none">
+<div id="s-3d" class="screen" style="height:100vh">
+  <div class="topbar" style="background:#1a1a1a;border-bottom:none;flex-shrink:0">
     <button class="btn-back" onclick="ir('s-etapa')" style="color:#fff">← Volver</button>
     <div class="topbar-title" style="color:#fff" id="t3d-nombre"></div>
   </div>
-  <div style="flex:1;min-height:0;background:#2b2b2b">
+  <div style="flex:1;min-height:0;background:#2b2b2b;position:relative">
     <model-viewer id="visor3d"
-      style="width:100%;height:100%;display:block"
+      style="position:absolute;inset:0;width:100%;height:100%"
       camera-controls
       touch-action="none"
       auto-rotate
@@ -330,6 +330,7 @@
       shadow-intensity="0.6"
       exposure="1">
     </model-viewer>
+    <div id="visor3d-msg" style="position:absolute;inset:0;display:none;align-items:center;justify-content:center;color:#ccc;font-size:14px;text-align:center;padding:24px"></div>
   </div>
 </div>
 
@@ -809,8 +810,27 @@ function carpetaDelTrabajo() {
 async function ver3D() {
   const carpetaId = carpetaDelTrabajo();
   if (!carpetaId) return;
+
+  // Diagnóstico: ¿la librería model-viewer llegó a cargar en este navegador?
+  if (!window.customElements || !customElements.get('model-viewer')) {
+    alert('El visor 3D no pudo inicializarse en este navegador.\nProbá actualizar Chrome / el navegador de la tablet, o verificá la conexión a internet (la librería se descarga de Google).');
+    return;
+  }
+
   document.getElementById('t3d-nombre').textContent = state.trabajo.cliente;
   const visor = document.getElementById('visor3d');
+  const msg = document.getElementById('visor3d-msg');
+  msg.style.display = 'none';
+
+  // Reportar errores internos del visor (modelo corrupto, WebGL no disponible, etc.)
+  if (!visor.dataset.listeners) {
+    visor.dataset.listeners = '1';
+    visor.addEventListener('error', ev => {
+      console.error('model-viewer error:', ev.detail);
+      msg.textContent = '⚠️ El visor no pudo mostrar el modelo: ' + (ev.detail && ev.detail.sourceError ? ev.detail.sourceError.message : (ev.detail ? JSON.stringify(ev.detail) : 'error desconocido'));
+      msg.style.display = 'flex';
+    });
+  }
 
   // Si ya lo descargamos en esta sesión, mostrarlo directo
   if (glbCache[state.trabajo.id]) {
