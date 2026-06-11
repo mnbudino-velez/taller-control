@@ -8,6 +8,7 @@
 <title>Taller Control</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/panzoom@9.4.3/dist/panzoom.min.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
 <style>
   :root {
     --blue: #185FA5; --blue-light: #E6F1FB; --blue-dark: #0C447C;
@@ -211,6 +212,8 @@
         <div class="etapa-detalle" id="e-mods-armado">Elegir módulo</div>
       </div>
     </div>
+    <div class="section-label" id="lbl-proyecto" style="display:none">Proyecto</div>
+    <button class="btn-md" id="btn-ver-3d" onclick="ver3D()" style="display:none">🧊 Ver proyecto en 3D</button>
   </div>
 </div>
 
@@ -305,6 +308,28 @@
     </div>
     <button class="btn-xl btn-blue" onclick="ir('s-etapa')">+ Nueva etapa</button>
     <button class="btn-md" onclick="cerrarSesion()">🔄 Cambiar operario</button>
+  </div>
+</div>
+
+
+
+<!-- VISOR 3D -->
+<div id="s-3d" class="screen">
+  <div class="topbar" style="background:#1a1a1a;border-bottom:none">
+    <button class="btn-back" onclick="ir('s-etapa')" style="color:#fff">← Volver</button>
+    <div class="topbar-title" style="color:#fff" id="t3d-nombre"></div>
+  </div>
+  <div style="flex:1;min-height:0;background:#2b2b2b">
+    <model-viewer id="visor3d"
+      style="width:100%;height:100%;display:block"
+      camera-controls
+      touch-action="none"
+      auto-rotate
+      auto-rotate-delay="1500"
+      interaction-prompt="none"
+      shadow-intensity="0.6"
+      exposure="1">
+    </model-viewer>
   </div>
 </div>
 
@@ -490,6 +515,9 @@ function elegirTrabajo(t) {
   });
   const ckA = document.getElementById('ck-armado');
   ckA.textContent = modsH > 0 && modsH === modsT.length ? '✅' : modsH > 0 ? '🔄' : '';
+  const hayCarpeta = !!carpetaDelTrabajo();
+  document.getElementById('btn-ver-3d').style.display = hayCarpeta ? 'flex' : 'none';
+  document.getElementById('lbl-proyecto').style.display = hayCarpeta ? 'block' : 'none';
   ir('s-etapa');
 }
 
@@ -766,6 +794,52 @@ function planoZoomBtn(dir) {
   if (!pzInstance) return;
   const zona = document.getElementById('a-plano-zona');
   pzInstance.smoothZoom(zona.clientWidth / 2, zona.clientHeight / 2, dir > 0 ? 1.4 : 1/1.4);
+}
+
+// ─── VISOR 3D — model-viewer con GLB servido por Apps Script ─────────────
+let glbCache = {}; // blob URL por trabajo, para no volver a descargar
+
+function carpetaDelTrabajo() {
+  if (!state.trabajo) return null;
+  const mods = datos.modulos.filter(m =>
+    m.trabajo_id === state.trabajo.id && m.url_plano && m.url_plano.includes('|'));
+  return mods.length ? mods[0].url_plano.split('|')[0] : null;
+}
+
+async function ver3D() {
+  const carpetaId = carpetaDelTrabajo();
+  if (!carpetaId) return;
+  document.getElementById('t3d-nombre').textContent = state.trabajo.cliente;
+  const visor = document.getElementById('visor3d');
+
+  // Si ya lo descargamos en esta sesión, mostrarlo directo
+  if (glbCache[state.trabajo.id]) {
+    visor.src = glbCache[state.trabajo.id];
+    ir('s-3d');
+    return;
+  }
+
+  mostrarLoading('Cargando modelo 3D...');
+  try {
+    const res = await scriptCall({ action: 'getGLB', carpeta_id: carpetaId });
+    const raw = atob(res.base64);
+    const bytes = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+    const blob = new Blob([bytes], { type: 'model/gltf-binary' });
+    const url = URL.createObjectURL(blob);
+    glbCache[state.trabajo.id] = url;
+    visor.src = url;
+    ocultarLoading();
+    ir('s-3d');
+  } catch(e) {
+    ocultarLoading();
+    console.error('Error cargando 3D:', e);
+    if (e.message === 'sin_3d') {
+      alert('Este proyecto no tiene modelo 3D cargado.\nSubí un archivo llamado "3d.glb" a la carpeta de planos del proyecto en Drive.');
+    } else {
+      alert('No se pudo cargar el modelo 3D: ' + e.message);
+    }
+  }
 }
 
 // Bloquear el zoom nativo de la página (iOS Safari)
