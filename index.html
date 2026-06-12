@@ -332,6 +332,9 @@
       exposure="1">
     </model-viewer>
     <div id="visor3d-msg" style="position:absolute;inset:0;display:none;align-items:center;justify-content:center;color:#ccc;font-size:14px;text-align:center;padding:24px"></div>
+    <div style="position:absolute;bottom:10px;right:10px;z-index:5">
+      <button class="pdf-zoom-btn" id="btn-toggle-puertas" onclick="toggle3D()" style="width:auto;padding:0 14px;font-size:15px">🚪 Puertas</button>
+    </div>
   </div>
 </div>
 
@@ -808,13 +811,17 @@ function carpetaDelTrabajo() {
   return mods.length ? mods[0].url_plano.split('|')[0] : null;
 }
 
-function ver3D() { origen3d = 's-modulos'; cargar3D(null); }
+function ver3D() { origen3d = 's-modulos'; cargar3D(null, false); }
 function verModulo3D() {
   origen3d = 's-armado';
-  cargar3D(state.moduloActual ? String(state.moduloActual.nombre) : null);
+  cargar3D(state.moduloActual ? String(state.moduloActual.nombre) : null, false);
 }
+function toggle3D() { cargar3D(estado3d.modulo, !estado3d.abierto); }
 
-async function cargar3D(modulo) {
+let estado3d = { modulo: null, abierto: false };
+let sinVariante = {}; // claves donde ya sabemos que no existe versión abierta
+
+async function cargar3D(modulo, abierto) {
   const carpetaId = carpetaDelTrabajo();
   if (!carpetaId) { alert('Este trabajo no tiene carpeta de planos asociada.'); return; }
 
@@ -824,9 +831,9 @@ async function cargar3D(modulo) {
     return;
   }
 
-  document.getElementById('t3d-nombre').textContent = modulo
+  document.getElementById('t3d-nombre').textContent = (modulo
     ? 'Módulo ' + modulo + ' · ' + state.trabajo.cliente
-    : state.trabajo.cliente;
+    : state.trabajo.cliente) + (abierto ? ' (abierto)' : '');
   const visor = document.getElementById('visor3d');
   const msg = document.getElementById('visor3d-msg');
   msg.style.display = 'none';
@@ -841,11 +848,14 @@ async function cargar3D(modulo) {
     });
   }
 
-  const clave = state.trabajo.id + '|' + (modulo || 'proyecto');
+  const clave = state.trabajo.id + '|' + (modulo || 'proyecto') + (abierto ? '|abierto' : '');
+  document.getElementById('btn-toggle-puertas').style.display =
+    sinVariante[state.trabajo.id + '|' + (modulo || 'proyecto')] ? 'none' : 'flex';
 
   // Si ya lo descargamos en esta sesión, mostrarlo directo
   if (glbCache[clave]) {
     visor.src = glbCache[clave];
+    estado3d = { modulo: modulo, abierto: abierto };
     ir('s-3d');
     return;
   }
@@ -854,6 +864,7 @@ async function cargar3D(modulo) {
   try {
     const params = { action: 'getGLB', carpeta_id: carpetaId };
     if (modulo) params.modulo = modulo;
+    if (abierto) params.variante = 'abierto';
     const res = await scriptCall(params);
     const raw = atob(res.base64);
     const bytes = new Uint8Array(raw.length);
@@ -862,15 +873,23 @@ async function cargar3D(modulo) {
     const url = URL.createObjectURL(blob);
     glbCache[clave] = url;
     visor.src = url;
+    estado3d = { modulo: modulo, abierto: abierto };
     ocultarLoading();
     ir('s-3d');
   } catch(e) {
     ocultarLoading();
     console.error('Error cargando 3D:', e);
     if (e.message === 'sin_3d') {
-      alert(modulo
-        ? 'No hay modelo 3D para este módulo.\nSubí un archivo llamado "' + modulo + '.glb" a la carpeta de planos del proyecto.'
-        : 'Este proyecto no tiene modelo 3D cargado.\nSubí un archivo .glb (ej: "3d.glb") a la carpeta de planos del proyecto.');
+      if (abierto) {
+        // No existe la versión abierta: avisar una vez y ocultar el botón para este modelo
+        sinVariante[state.trabajo.id + '|' + (modulo || 'proyecto')] = true;
+        document.getElementById('btn-toggle-puertas').style.display = 'none';
+        alert('Este modelo no tiene versión sin puertas.\nSubí un archivo "' + (modulo ? modulo : '3d') + '-abierto.glb" a la carpeta de planos para habilitarla.');
+      } else {
+        alert(modulo
+          ? 'No hay modelo 3D para este módulo.\nSubí un archivo llamado "' + modulo + '.glb" a la carpeta de planos del proyecto.'
+          : 'Este proyecto no tiene modelo 3D cargado.\nSubí un archivo .glb (ej: "3d.glb") a la carpeta de planos del proyecto.');
+      }
     } else {
       alert('No se pudo cargar el modelo 3D: ' + e.message);
     }
