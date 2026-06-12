@@ -206,6 +206,11 @@
         <div class="etapa-icon">📦</div><div class="etapa-nombre">Clasificación</div>
         <div class="etapa-detalle" id="e-mods-clasificacion">— módulos</div>
       </div>
+      <div class="etapa-card" id="ec-agujereado" onclick="irEtapaSimple('agujereado')">
+        <div class="etapa-check" id="ck-agujereado"></div>
+        <div class="etapa-icon">🔩</div><div class="etapa-nombre">Agujereado puertas</div>
+        <div class="etapa-detalle">bisagras y herrajes</div>
+      </div>
       <div class="etapa-card" onclick="irModulos()">
         <div class="etapa-check" id="ck-armado"></div>
         <div class="etapa-icon">🔧</div><div class="etapa-nombre">Armado</div>
@@ -513,7 +518,7 @@ function elegirTrabajo(t) {
   const modsT = datos.modulos.filter(m => m.trabajo_id === t.id);
   const modsH = modsT.filter(m => m.estado === 'terminado').length;
   document.getElementById('e-mods-armado').textContent = modsH + '/' + modsT.length + ' módulos';
-  ['descarga','corte','clasificacion'].forEach(e => {
+  ['descarga','corte','clasificacion','agujereado'].forEach(e => {
     const card = document.getElementById('ec-' + e), check = document.getElementById('ck-' + e);
     if (state.etapasHechas[e]) { card.classList.add('hecha'); check.textContent = '✅'; }
     else { card.classList.remove('hecha'); check.textContent = ''; }
@@ -526,7 +531,8 @@ function elegirTrabajo(t) {
 const ETAPA_INFO = {
   descarga:      { nombre:'Descarga',       unidad:'piezas',  getCant: t => t.piezas },
   corte:         { nombre:'Corte / rebaje', unidad:'piezas',  getCant: t => t.piezas },
-  clasificacion: { nombre:'Clasificación',  unidad:'módulos', getCant: t => t.modulos }
+  clasificacion: { nombre:'Clasificación',  unidad:'módulos', getCant: t => t.modulos },
+  agujereado:    { nombre:'Agujereado de puertas', unidad:'puertas', getCant: t => null, pedirCantidad: true }
 };
 
 function irEtapaSimple(etapa) {
@@ -535,7 +541,7 @@ function irEtapaSimple(etapa) {
   resetCrono();
   document.getElementById('c-etapa-nombre').textContent = info.nombre;
   document.getElementById('c-trabajo-nombre').textContent = state.trabajo.cliente + ' · ' + state.operario.nombre;
-  document.getElementById('c-cantidad').textContent = info.getCant(state.trabajo);
+  document.getElementById('c-cantidad').textContent = info.pedirCantidad ? '—' : info.getCant(state.trabajo);
   document.getElementById('c-unidad').textContent = info.unidad;
   document.getElementById('c-time').textContent = '00:00:00';
   document.getElementById('c-time').className = 'crono-time';
@@ -576,7 +582,13 @@ function accionCrono() {
 async function guardarEtapa() {
   clearInterval(crono.interval);
   const info = ETAPA_INFO[state.etapa];
-  const cant = parseInt(info.getCant(state.trabajo)) || 0;
+  let cant;
+  if (info.pedirCantidad) {
+    const respuesta = prompt('¿Cuántas ' + info.unidad + ' se hicieron?', '');
+    cant = parseInt(respuesta) || 0;
+  } else {
+    cant = parseInt(info.getCant(state.trabajo)) || 0;
+  }
   const ritmo = crono.segundos > 0 ? Math.round(cant / (crono.segundos/3600)) : 0;
   mostrarResumen(info.nombre, crono.segundos, crono.pausas, ritmo, info.unidad);
   state.etapasHechas[state.etapa] = true;
